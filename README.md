@@ -137,16 +137,16 @@ Output:
 
 ---
 
-## 💻 Frontend & Design System (getdesign.md Inspired)
+## 💻 Frontend & Design System (Tic-Tac-Toe Arena Inspired)
 
-The RoastWars web application features a state-of-the-art dark-mode developer aesthetic crafted using design tokens extracted from **[getdesign.md](https://getdesign.md/)** — specifically combining the polished surfaces of **Raycast** and the precision hairlines and typography of **Linear**:
+The RoastWars web application features a high-impact **Neo-Brutalist Web3 Gaming Arena** aesthetic directly inspired by the design system of **Tic-Tac-Toe AI Arena** (`tictactoe-genlayer`):
 
-- **Surface Ladder**: Stepped near-black background layers (`#07080a` → `#0c0d0f` → `#111215` → `#141518` → `#18191d`) providing deep contrast and clean hierarchy.
-- **Precision Hairlines**: 1px translucent borders (`rgba(255, 255, 255, 0.08)`) with subtle hover transitions.
-- **Top Brand Stripe**: Signature Raycast-style multi-stop animated gradient bar across the top viewport.
-- **Typography**: Inter (sans-serif) for high legibility, paired with JetBrains Mono for on-chain addresses, wagers, and scores.
-- **Pill Segmentation**: Segmented pill filter controls for fast battle mode toggling (`All`, `Completed`, `Open`, `Roast`, `Toast`).
-- **Interactive AI Jury Chamber**: Live 5-validator consensus animation, visual score gauges, AI critique reveal, and winner crowning.
+- **Neo-Brutalist Architecture**: Thick 3px/4px solid ink borders (`#1E293B`), sharp corners (`border-radius: 0px`), and hard offset drop shadows (`4px 4px 0px 0px #1E293B`, `6px 6px 0px 0px #1E293B`).
+- **Interactive Active States**: Buttons and cards depress with physical feel on hover/press (`transform: translate(2px, 2px)` and shadow shifts to fiery flame `#EA580C`).
+- **Space Grotesk Typography**: Punchy, high-contrast, uppercase headlines and buttons in **Space Grotesk** paired with **Inter** body text and **JetBrains Mono** for on-chain addresses and stakes.
+- **Live Marquee Ticker**: Continuous animated top banner highlighting arena rules, multi-validator LLM consensus, and prize pots.
+- **Arena Battle Cards**: Distinctive battle cards with `BATTLE #ID` header, stakes badges, side-by-side contender boxes, and winner crown highlights.
+- **Interactive AI Jury Chamber**: Live 5-validator consensus visualization (`gl.vm.run_nondet_unsafe`), visual score gauges, AI critique reveal, and winner crowning.
 
 ```bash
 # Start a local web server in the app directory
@@ -171,7 +171,7 @@ roast-wars/
 │   └── roast_wars_banner.jpg      # Official project banner & visual assets
 ├── app/
 │   ├── index.html                 # Arena web application layout
-│   ├── style.css                  # Raycast & Linear inspired design system
+│   ├── style.css                  # Neo-Brutalist gaming arena design system
 │   └── app.js                     # Interactive controller & contract client
 ├── contracts/
 │   └── roast_wars.py              # GenLayer Intelligent Contract (v0.6 runner)

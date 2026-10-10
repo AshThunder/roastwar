@@ -205,10 +205,10 @@ function renderDuels() {
 
   if (filtered.length === 0) {
     duelsGrid.innerHTML = `
-      <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; background: var(--surface-2); border-radius: var(--radius-lg); border: 1px dashed var(--hairline-hover);">
-        <div style="font-size: 40px; margin-bottom: 12px;">🎪</div>
-        <h3 style="font-family: var(--font-sans); font-size: 20px; margin-bottom: 8px;">No duels match the filter</h3>
-        <p style="color: var(--ink-muted); font-size: 14px; margin-bottom: 20px;">Be the legend who sparks the arena with a new challenge!</p>
+      <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; background: #FFFFFF; border: 3px dashed var(--border); box-shadow: var(--shadow-md);">
+        <div style="font-size: 44px; margin-bottom: 12px;">⚔️</div>
+        <h3 style="font-family: var(--font-headline); font-size: 22px; margin-bottom: 8px;">NO DUELS MATCH THIS FILTER</h3>
+        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px; font-weight: 500;">Be the legend who ignites the arena with a new challenge!</p>
         <button class="btn btn-primary" onclick="openCreateModal()">🔥 Ignite Duel</button>
       </div>
     `;
@@ -217,7 +217,7 @@ function renderDuels() {
 
   duelsGrid.innerHTML = filtered.map(duel => {
     const isRoast = duel.mode === "ROAST";
-    const pot = duel.status === "OPEN" ? duel.stake * 2 : duel.stake * 2;
+    const pot = duel.stake * 2;
     const isResolved = duel.status === "RESOLVED";
     const isAccepted = duel.status === "ACCEPTED";
     const isOpen = duel.status === "OPEN";
@@ -226,54 +226,68 @@ function renderDuels() {
     if (isOpen) {
       actionBtn = `<button class="btn btn-primary" onclick="openAcceptModal(${duel.id})">⚔️ Accept Challenge (${duel.stake} GEN)</button>`;
     } else if (isAccepted) {
-      actionBtn = `<button class="btn btn-secondary" onclick="openJuryModal(${duel.id})">⚖️ Summon AI Jury Consensus</button>`;
+      actionBtn = `<button class="btn btn-primary" onclick="openJuryModal(${duel.id})">⚖️ Summon AI Jury Consensus</button>`;
     } else if (isResolved) {
-      actionBtn = `<button class="btn btn-ghost" onclick="openJuryModal(${duel.id})">🏆 View Jury Deliberation & Scores</button>`;
+      actionBtn = `<button class="btn btn-secondary" onclick="openJuryModal(${duel.id})">🏆 View Jury Deliberation & Scores</button>`;
     }
 
     return `
-      <div class="duel-card ${isRoast ? 'mode-roast' : 'mode-compliment'}">
+      <div class="duel-card">
         <div class="duel-card-header">
+          <span class="duel-battle-id">BATTLE #${duel.id}</span>
           <div class="duel-badges-wrap">
             <span class="badge ${isRoast ? 'badge-roast' : 'badge-compliment'}">
-              ${isRoast ? '🔥 ROAST BATTLE' : '💖 COMPLIMENT'}
+              ${isRoast ? '🔥 ROAST' : '💖 COMPLIMENT'}
             </span>
             <span class="badge badge-status ${duel.status.toLowerCase()}">
               ${duel.status}
             </span>
           </div>
-          <div class="duel-pot-badge">
-            <span>🏆</span>
-            <span>Pot: ${pot.toFixed(1)} GEN</span>
-          </div>
         </div>
 
-        <div class="duel-topic">${escapeHtml(duel.topic)}</div>
-
-        <div class="contenders-container">
-          <!-- Contender 1 (Creator) -->
-          <div class="contender-box ${duel.winner === duel.creator ? 'winner-box' : ''}">
-            <div class="contender-meta">
-              <span class="contender-role">Creator: ${duel.creator_name || formatAddr(duel.creator)}</span>
-              ${isResolved ? `<span class="contender-score-pill">Score: ${duel.creator_score}/10</span>` : ''}
-            </div>
-            <div class="punchline-quote">"${escapeHtml(duel.creator_punchline)}"</div>
+        <div class="duel-card-body">
+          <div class="duel-stakes-bar">
+            <span>💰 STAKE: ${duel.stake.toFixed(1)} GEN</span>
+            <span class="duel-pot-val">🏆 POT: ${pot.toFixed(1)} GEN</span>
           </div>
 
-          <!-- Contender 2 (Challenger) -->
-          ${duel.opponent ? `
-            <div class="contender-box ${duel.winner === duel.opponent ? 'winner-box' : ''}">
+          <div class="duel-topic">${escapeHtml(duel.topic)}</div>
+
+          <div class="contenders-container">
+            <!-- Contender 1 (Creator) -->
+            <div class="contender-box ${duel.winner === duel.creator ? 'winner-box' : ''}">
               <div class="contender-meta">
-                <span class="contender-role">Challenger: ${duel.opponent_name || formatAddr(duel.opponent)}</span>
-                ${isResolved ? `<span class="contender-score-pill">Score: ${duel.opponent_score}/10</span>` : ''}
+                <span class="contender-role">
+                  <span>🎭</span> Creator: ${duel.creator_name || formatAddr(duel.creator)}
+                </span>
+                <div style="display: flex; gap: 4px; align-items: center;">
+                  ${isResolved && duel.winner === duel.creator ? '<span class="winner-crown-tag">👑 Victor</span>' : ''}
+                  ${isResolved ? `<span class="contender-score-pill">${duel.creator_score}/10</span>` : ''}
+                </div>
               </div>
-              <div class="punchline-quote">"${escapeHtml(duel.opponent_punchline)}"</div>
+              <div class="punchline-quote">"${escapeHtml(duel.creator_punchline)}"</div>
             </div>
-          ` : `
-            <div class="awaiting-challenger-box">
-              <span>⏳ Awaiting a challenger to match ${duel.stake} GEN stake...</span>
-            </div>
-          `}
+
+            <!-- Contender 2 (Challenger) -->
+            ${duel.opponent ? `
+              <div class="contender-box ${duel.winner === duel.opponent ? 'winner-box' : ''}">
+                <div class="contender-meta">
+                  <span class="contender-role">
+                    <span>⚔️</span> Challenger: ${duel.opponent_name || formatAddr(duel.opponent)}
+                  </span>
+                  <div style="display: flex; gap: 4px; align-items: center;">
+                    ${isResolved && duel.winner === duel.opponent ? '<span class="winner-crown-tag">👑 Victor</span>' : ''}
+                    ${isResolved ? `<span class="contender-score-pill">${duel.opponent_score}/10</span>` : ''}
+                  </div>
+                </div>
+                <div class="punchline-quote">"${escapeHtml(duel.opponent_punchline)}"</div>
+              </div>
+            ` : `
+              <div class="awaiting-challenger-box">
+                <span>⏳ Awaiting opponent to match ${duel.stake.toFixed(1)} GEN stake...</span>
+              </div>
+            `}
+          </div>
         </div>
 
         <div class="duel-card-footer">
@@ -344,10 +358,10 @@ function renderLeaderboard() {
             </div>
           </div>
         </td>
-        <td><strong>${p.wins}</strong> W / <span style="color: var(--ink-muted);">${p.losses} L</span></td>
-        <td><strong>${winRate}%</strong></td>
-        <td><span style="font-family: var(--font-mono); color: var(--accent-cyan); font-weight: 700;">${p.highScore}/10</span></td>
-        <td><strong style="color: var(--accent-gold); font-family: var(--font-mono);">${p.totalEarned.toFixed(1)} GEN</strong></td>
+        <td><strong>${p.wins}</strong> W / <span style="color: var(--text-muted);">${p.losses} L</span></td>
+        <td><strong style="font-family: var(--font-headline);">${winRate}%</strong></td>
+        <td><span style="font-family: var(--font-mono); color: var(--primary); font-weight: 800;">${p.highScore}/10</span></td>
+        <td><strong style="color: var(--accent-gold); font-family: var(--font-mono); font-weight: 800;">${p.totalEarned.toFixed(1)} GEN</strong></td>
       </tr>
     `;
   }).join("");
@@ -458,7 +472,8 @@ function executeJudgeDuel(duelId) {
   nodes.forEach((n, idx) => {
     setTimeout(() => {
       n.style.transform = "scale(1.05)";
-      n.style.borderColor = "var(--accent-gold)";
+      n.style.borderColor = "var(--primary)";
+      n.style.boxShadow = "2px 2px 0px var(--primary)";
     }, idx * 400);
   });
 
