@@ -7,7 +7,9 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "python3 -m http.server 3033 --directory app",
+    "build:client": "esbuild src/browser_client.js --bundle --outfile=app/genlayer-client.js --format=iife --define:process.env.NODE_ENV='\"production\"'",
+    "test": "pytest"
   },
   "keywords": [],
   "author": "",
