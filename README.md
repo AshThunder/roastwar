@@ -137,9 +137,16 @@ Output:
 
 ---
 
-## 💻 Running the Frontend Locally
+## 💻 Frontend & Design System (getdesign.md Inspired)
 
-The RoastWars web application is built with vanilla HTML5, modern CSS3 (glassmorphism & cyberpunk dark theme), and interactive JavaScript connecting directly to the deployed contract:
+The RoastWars web application features a state-of-the-art dark-mode developer aesthetic crafted using design tokens extracted from **[getdesign.md](https://getdesign.md/)** — specifically combining the polished surfaces of **Raycast** and the precision hairlines and typography of **Linear**:
+
+- **Surface Ladder**: Stepped near-black background layers (`#07080a` → `#0c0d0f` → `#111215` → `#141518` → `#18191d`) providing deep contrast and clean hierarchy.
+- **Precision Hairlines**: 1px translucent borders (`rgba(255, 255, 255, 0.08)`) with subtle hover transitions.
+- **Top Brand Stripe**: Signature Raycast-style multi-stop animated gradient bar across the top viewport.
+- **Typography**: Inter (sans-serif) for high legibility, paired with JetBrains Mono for on-chain addresses, wagers, and scores.
+- **Pill Segmentation**: Segmented pill filter controls for fast battle mode toggling (`All`, `Completed`, `Open`, `Roast`, `Toast`).
+- **Interactive AI Jury Chamber**: Live 5-validator consensus animation, visual score gauges, AI critique reveal, and winner crowning.
 
 ```bash
 # Start a local web server in the app directory
@@ -164,7 +171,7 @@ roast-wars/
 │   └── roast_wars_banner.jpg      # Official project banner & visual assets
 ├── app/
 │   ├── index.html                 # Arena web application layout
-│   ├── style.css                  # Cyberpunk glassmorphism design system
+│   ├── style.css                  # Raycast & Linear inspired design system
 │   └── app.js                     # Interactive controller & contract client
 ├── contracts/
 │   └── roast_wars.py              # GenLayer Intelligent Contract (v0.6 runner)

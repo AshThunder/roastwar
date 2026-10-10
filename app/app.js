@@ -205,10 +205,10 @@ function renderDuels() {
 
   if (filtered.length === 0) {
     duelsGrid.innerHTML = `
-      <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px dashed var(--border-subtle);">
+      <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; background: var(--surface-2); border-radius: var(--radius-lg); border: 1px dashed var(--hairline-hover);">
         <div style="font-size: 40px; margin-bottom: 12px;">🎪</div>
-        <h3 style="font-family: var(--font-heading); font-size: 20px; margin-bottom: 8px;">No duels match the filter</h3>
-        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">Be the legend who sparks the arena with a new challenge!</p>
+        <h3 style="font-family: var(--font-sans); font-size: 20px; margin-bottom: 8px;">No duels match the filter</h3>
+        <p style="color: var(--ink-muted); font-size: 14px; margin-bottom: 20px;">Be the legend who sparks the arena with a new challenge!</p>
         <button class="btn btn-primary" onclick="openCreateModal()">🔥 Ignite Duel</button>
       </div>
     `;
@@ -344,10 +344,10 @@ function renderLeaderboard() {
             </div>
           </div>
         </td>
-        <td><strong>${p.wins}</strong> W / <span style="color: var(--text-muted);">${p.losses} L</span></td>
+        <td><strong>${p.wins}</strong> W / <span style="color: var(--ink-muted);">${p.losses} L</span></td>
         <td><strong>${winRate}%</strong></td>
-        <td><span style="font-family: var(--font-mono); color: var(--color-secondary-light); font-weight: 700;">${p.highScore}/10</span></td>
-        <td><strong style="color: var(--color-accent); font-family: var(--font-mono);">${p.totalEarned.toFixed(1)} GEN</strong></td>
+        <td><span style="font-family: var(--font-mono); color: var(--accent-cyan); font-weight: 700;">${p.highScore}/10</span></td>
+        <td><strong style="color: var(--accent-gold); font-family: var(--font-mono);">${p.totalEarned.toFixed(1)} GEN</strong></td>
       </tr>
     `;
   }).join("");
@@ -458,7 +458,7 @@ function executeJudgeDuel(duelId) {
   nodes.forEach((n, idx) => {
     setTimeout(() => {
       n.style.transform = "scale(1.05)";
-      n.style.borderColor = "var(--color-accent)";
+      n.style.borderColor = "var(--accent-gold)";
     }, idx * 400);
   });
 
