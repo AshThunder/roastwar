@@ -1,9 +1,9 @@
 {
-  "network": "studio-dev",
-  "chainId": 61997,
-  "rpcUrl": "https://studio-next.genlayer.com/api",
-  "contractAddress": "0x4eA7372915658bdBd94cBB299F4B233913977a88",
-  "deployTxHash": "0x68f399d42588d31f66ecacac48200247f6773e1485b1f378fac96a4940161757",
-  "deployer": "0x8cbc478963705971f15052e579a8eb4faf7b2211",
-  "deployedAt": "2026-10-10T12:05:10Z"
+  "network": "studionet",
+  "chainId": 61999,
+  "rpcUrl": "https://studio.genlayer.com/api",
+  "contractAddress": "0xc3b21E949187120CdBd8f273F5d6b3d9963772eB",
+  "deployTxHash": "0xb017543dc2fac927c66630aab5585bd77cd5bd5d99b04459255ab6f813548bbf",
+  "deployer": "0x8cbc478963705971F15052e579a8Eb4faF7B2211",
+  "deployedAt": "2026-10-10T17:02:41.505Z"
 }

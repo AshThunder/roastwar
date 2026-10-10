@@ -59,11 +59,11 @@
       <div class="nav-center">
         <div class="network-badge" id="networkBadge">
           <span class="status-dot pulsing"></span>
-          <span class="network-name">Studio Next (Chain 61997)</span>
+          <span class="network-name">StudioNet (Chain 61999)</span>
         </div>
-        <a href="https://studio-next.genlayer.com" target="_blank" rel="noopener" class="contract-link" id="contractAddressDisplay" title="Click to view deployed contract on Studio Next">
+        <a href="https://genlayer-explorer.vercel.app" target="_blank" rel="noopener" class="contract-link" id="contractAddressDisplay" title="Click to view deployed contract on StudioNet">
           <span class="link-icon">📜</span>
-          <span class="contract-hash">0x4eA7...7a88</span>
+          <span class="contract-hash">0xc3b2...72eB</span>
         </a>
       </div>
 
@@ -71,12 +71,15 @@
         <div class="account-selector-wrapper">
           <label for="accountSelect" class="sr-only">Select Player Account</label>
           <select id="accountSelect" class="account-select">
-            <option value="deployer">Deployer (0x8cbc...2211) • 9.89 GEN</option>
-            <option value="alice">Alice The Savage (0x25b7...4ffd) • 50.0 GEN</option>
-            <option value="bob">Bob The Witty (0x5255...5e1a) • 25.0 GEN</option>
-            <option value="charlie">Charlie Compliments (0xbd95...aa2f) • 15.0 GEN</option>
+            <option value="deployer">Deployer (0x8cbc...2211) • 1,000 GEN</option>
+            <option value="alice">Alice The Savage (0x25b7...4ffd) • 1,007,426 GEN</option>
           </select>
         </div>
+
+        <button class="btn btn-secondary" id="btnSyncOnChain" title="Refresh live contract state from StudioNet">
+          <span class="btn-icon">🔄</span>
+          <span>Sync</span>
+        </button>
 
         <button class="btn btn-primary" id="btnOpenCreateModal">
           <span class="btn-icon">⚡</span>
@@ -230,10 +233,10 @@
             <h3>Deployed Network Details</h3>
           </div>
           <ul class="info-list">
-            <li><strong>Network:</strong> GenLayer Studio Next (Devnet)</li>
-            <li><strong>Chain ID:</strong> <code>61997</code> (0xf22d)</li>
-            <li><strong>Contract:</strong> <code>0x4eA7372915658bdBd94cBB299F4B233913977a88</code></li>
-            <li><strong>Runner:</strong> <code>py-genlayer:5jycge4q...</code> (v0.6)</li>
+            <li><strong>Network:</strong> GenLayer StudioNet</li>
+            <li><strong>Chain ID:</strong> <code>61999</code> (0xf22f)</li>
+            <li><strong>Contract:</strong> <code>0xc3b21E949187120CdBd8f273F5d6b3d9963772eB</code></li>
+            <li><strong>Runner:</strong> <code>py-genlayer:1jb45aa8...</code> (consensus-pinned)</li>
           </ul>
         </div>
       </div>
@@ -483,13 +486,14 @@
       </div>
 
       <div class="footer-right">
-        <a href="https://studio-next.genlayer.com" target="_blank" rel="noopener" class="footer-link">GenLayer Studio Next</a>
+        <a href="https://studio.genlayer.com" target="_blank" rel="noopener" class="footer-link">GenLayer Studio</a>
         <a href="https://docs.genlayer.com" target="_blank" rel="noopener" class="footer-link">Documentation</a>
         <a href="https://github.com/genlayerlabs" target="_blank" rel="noopener" class="footer-link">GitHub</a>
       </div>
     </div>
   </footer>
 
+  <script src="genlayer-client.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
