@@ -1,0 +1,9 @@
+{
+  "network": "studio-dev",
+  "chainId": 61997,
+  "rpcUrl": "https://studio-next.genlayer.com/api",
+  "contractAddress": "0x4eA7372915658bdBd94cBB299F4B233913977a88",
+  "deployTxHash": "0x68f399d42588d31f66ecacac48200247f6773e1485b1f378fac96a4940161757",
+  "deployer": "0x8cbc478963705971f15052e579a8eb4faf7b2211",
+  "deployedAt": "2026-10-10T12:05:10Z"
+}

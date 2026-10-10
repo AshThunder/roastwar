@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoastWars — Autonomous On-Chain AI Comedy Arena | GenLayer</title>
+  <meta name="description" content="Decentralized wit and comedy battle arena powered by GenLayer multi-validator AI consensus. Wager GEN tokens, battle in roast and compliment duels, and let AI crown the winner.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Ambient background glow effects -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <div class="ambient-glow glow-3"></div>
+
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="brand">
+        <div class="logo-emblem">🔥</div>
+        <div class="logo-text">
+          <span class="logo-title">ROAST<span class="highlight">WARS</span></span>
+          <span class="logo-badge">GENLAYER AI ARENA</span>
+        </div>
+      </div>
+
+      <div class="nav-center">
+        <div class="network-badge" id="networkBadge">
+          <span class="status-dot pulsing"></span>
+          <span class="network-name">Studio Next (Chain 61997)</span>
+        </div>
+        <a href="https://studio-next.genlayer.com" target="_blank" rel="noopener" class="contract-link" id="contractAddressDisplay" title="Click to view deployed contract on Studio Next">
+          <span class="link-icon">📜</span>
+          <span class="contract-hash">0x4eA7...7a88</span>
+        </a>
+      </div>
+
+      <div class="nav-right">
+        <div class="account-selector-wrapper">
+          <label for="accountSelect" class="sr-only">Select Player Account</label>
+          <select id="accountSelect" class="account-select">
+            <option value="deployer">Deployer (0x8cbc...2211) • 9.89 GEN</option>
+            <option value="alice">Alice The Savage (0x25b7...4ffd) • 50.0 GEN</option>
+            <option value="bob">Bob The Witty (0x5255...5e1a) • 25.0 GEN</option>
+            <option value="charlie">Charlie Compliments (0xbd95...aa2f) • 15.0 GEN</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary" id="btnOpenCreateModal">
+          <span class="btn-icon">⚡</span>
+          <span>Create Duel</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main class="main-content">
+    <section class="hero-section">
+      <div class="hero-card">
+        <div class="hero-content">
+          <div class="hero-tag">
+            <span class="tag-icon">🤖</span>
+            <span>Intelligent Contract Consensus v0.6 Active</span>
+          </div>
+          <h1 class="hero-title">
+            Where Punchlines Meet <span class="gradient-text">Consensus</span>
+          </h1>
+          <p class="hero-subtitle">
+            The world's first autonomous on-chain comedy club. Contenders wager GEN tokens, deliver burns or poetic compliments, and GenLayer's decentralized AI jury deliberates to crown the undisputed comedy champion.
+          </p>
+
+          <div class="hero-actions">
+            <button class="btn btn-primary btn-lg" id="btnHeroCreate">
+              <span>🔥 Start a Battle</span>
+            </button>
+            <button class="btn btn-secondary btn-lg" id="btnExploreLobby">
+              <span>👀 Browse Open Duels</span>
+            </button>
+            <button class="btn btn-ghost btn-lg" id="btnQuickDemo">
+              <span>⚡ Load Interactive Demo</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="hero-stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">⚔️</div>
+            <div class="stat-value" id="statTotalDuels">12</div>
+            <div class="stat-label">Total Duels</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-value" id="statTotalVolume">24.5 GEN</div>
+            <div class="stat-label">Total Pot Volume</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⚖️</div>
+            <div class="stat-value" id="statAIJudged">9</div>
+            <div class="stat-label">AI Verdicts Crowned</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🛡️</div>
+            <div class="stat-value highlight-green">100%</div>
+            <div class="stat-label">Validator Consensus</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Arena Lobby Section -->
+    <section class="arena-section" id="arenaLobby">
+      <div class="section-header">
+        <div class="header-left">
+          <h2 class="section-title">Battle Arena Lobby</h2>
+          <p class="section-desc">Join open duels, challenge rivals, or watch the AI Jury deliver consensus justice.</p>
+        </div>
+
+        <div class="lobby-controls">
+          <div class="filter-tabs">
+            <button class="tab-btn active" data-filter="all">All Duels (<span id="countAll">0</span>)</button>
+            <button class="tab-btn" data-filter="OPEN">Open Challenges (<span id="countOpen">0</span>)</button>
+            <button class="tab-btn" data-filter="ACCEPTED">Judging Chamber (<span id="countAccepted">0</span>)</button>
+            <button class="tab-btn" data-filter="RESOLVED">Hall of Fame (<span id="countResolved">0</span>)</button>
+          </div>
+
+          <div class="mode-filter-wrapper">
+            <label for="modeFilter" class="sr-only">Format Filter</label>
+            <select id="modeFilter" class="mode-select">
+              <option value="ALL">All Formats</option>
+              <option value="ROAST">🔥 Roast Battles</option>
+              <option value="COMPLIMENT">💖 Compliment Duels</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Duel Cards Grid -->
+      <div class="duels-grid" id="duelsGrid">
+        <!-- Rendered dynamically via app.js -->
+      </div>
+    </section>
+
+    <!-- Leaderboard & Top Roasters Section -->
+    <section class="leaderboard-section">
+      <div class="section-header">
+        <div class="header-left">
+          <h2 class="section-title">Hall of Fame & Leaderboard</h2>
+          <p class="section-desc">Highest scoring comedians ranked by jury praise, victory rate, and GEN earnings.</p>
+        </div>
+      </div>
+
+      <div class="leaderboard-card">
+        <table class="leaderboard-table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Contender</th>
+              <th>Wins / Losses</th>
+              <th>Win Rate</th>
+              <th>High Score</th>
+              <th>Total Earned</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboardBody">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Architecture & Contract Info -->
+    <section class="info-section">
+      <div class="info-grid">
+        <div class="info-box">
+          <div class="info-box-header">
+            <span class="info-icon">🧠</span>
+            <h3>How AI Consensus Works</h3>
+          </div>
+          <p>
+            Unlike Web2 chatbots, RoastWars uses GenLayer's <code>gl.vm.run_nondet_unsafe</code> equivalence principle. The leader validator prompts an LLM with strict comedy rules, scoring rubrics, and JSON formatting. Validator nodes independently verify agreement on the crowned winner before on-chain state updates.
+          </p>
+        </div>
+
+        <div class="info-box">
+          <div class="info-box-header">
+            <span class="info-icon">💎</span>
+            <h3>Zero Gas & Internal Escrow</h3>
+          </div>
+          <p>
+            Stakes are wagered in native GEN and securely pooled in the intelligent contract. Winning pots (2x stake) are programmatically credited to the victor's internal ledger with full withdrawability. Ties split the pot 50/50.
+          </p>
+        </div>
+
+        <div class="info-box">
+          <div class="info-box-header">
+            <span class="info-icon">⛓️</span>
+            <h3>Deployed Network Details</h3>
+          </div>
+          <ul class="info-list">
+            <li><strong>Network:</strong> GenLayer Studio Next (Devnet)</li>
+            <li><strong>Chain ID:</strong> <code>61997</code> (0xf22d)</li>
+            <li><strong>Contract:</strong> <code>0x4eA7372915658bdBd94cBB299F4B233913977a88</code></li>
+            <li><strong>Runner:</strong> <code>py-genlayer:5jycge4q...</code> (v0.6)</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Create Duel Modal -->
+  <div class="modal-overlay" id="createModalOverlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-icon">🔥</span>
+          <h3>Ignite a New Battle</h3>
+        </div>
+        <button class="modal-close-btn" id="btnCloseCreateModal">&times;</button>
+      </div>
+
+      <form id="createDuelForm" class="modal-form">
+        <div class="form-group">
+          <label for="duelTopic">Target / Topic</label>
+          <input type="text" id="duelTopic" class="form-input" placeholder="e.g. Crypto VCs, AI Startups, Solana Degens..." required maxlength="80">
+          <div class="topic-presets">
+            <span class="preset-label">Quick Presets:</span>
+            <button type="button" class="preset-tag" data-topic="Crypto VCs">Crypto VCs</button>
+            <button type="button" class="preset-tag" data-topic="AI Startups">AI Startups</button>
+            <button type="button" class="preset-tag" data-topic="Solana Memecoin Degens">Memecoin Degens</button>
+            <button type="button" class="preset-tag" data-topic="Solidity Maximalists">Solidity Maxis</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Battle Format</label>
+          <div class="mode-toggle-group">
+            <label class="mode-toggle-option active" id="modeOptionRoast">
+              <input type="radio" name="duelMode" value="ROAST" checked>
+              <span class="toggle-emoji">🔥</span>
+              <span class="toggle-text">
+                <strong>Roast Battle</strong>
+                <small>Brutal wit, metaphors & burns</small>
+              </span>
+            </label>
+            <label class="mode-toggle-option" id="modeOptionCompliment">
+              <input type="radio" name="duelMode" value="COMPLIMENT">
+              <span class="toggle-emoji">💖</span>
+              <span class="toggle-text">
+                <strong>Compliment Duel</strong>
+                <small>Wholesome poetic flattery</small>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="creatorPunchline">Your Opening Punchline</label>
+          <textarea id="creatorPunchline" class="form-textarea" placeholder="Drop your sharpest line here (5 - 500 characters)..." required minlength="5" maxlength="500"></textarea>
+          <div class="char-counter"><span id="charCount">0</span> / 500 characters</div>
+        </div>
+
+        <div class="form-group">
+          <label for="duelStake">Stake Wager (per contender)</label>
+          <div class="stake-input-wrapper">
+            <input type="number" id="duelStake" class="form-input" min="0.01" max="10.0" step="0.05" value="1.0" required>
+            <span class="input-unit">GEN</span>
+          </div>
+          <div class="stake-hint">Total Winner Pot: <strong id="totalPotPreview">2.0 GEN</strong> (minus zero fees)</div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelCreate">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitCreate">
+            <span class="btn-icon">⚡</span>
+            <span>Deploy Duel to GenLayer</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Accept Duel Modal -->
+  <div class="modal-overlay" id="acceptModalOverlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-icon">⚔️</span>
+          <h3>Accept Challenge</h3>
+        </div>
+        <button class="modal-close-btn" id="btnCloseAcceptModal">&times;</button>
+      </div>
+
+      <form id="acceptDuelForm" class="modal-form">
+        <input type="hidden" id="acceptDuelId">
+
+        <div class="duel-summary-box">
+          <div class="summary-topic-badge" id="acceptTopicBadge">Topic: Crypto VCs</div>
+          <div class="summary-creator-wrap">
+            <span class="summary-label">Creator's Line:</span>
+            <blockquote class="summary-quote" id="acceptCreatorPunchline">"Your pitch deck has 4 slides..."</blockquote>
+          </div>
+          <div class="summary-stake-line">
+            Required Matching Stake: <strong id="acceptStakeAmount">1.0 GEN</strong>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="opponentPunchline">Your Counter-Punchline</label>
+          <textarea id="opponentPunchline" class="form-textarea" placeholder="Deliver your devastating comeback line..." required minlength="5" maxlength="500"></textarea>
+          <div class="char-counter"><span id="acceptCharCount">0</span> / 500 characters</div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelAccept">Back</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitAccept">
+            <span class="btn-icon">💥</span>
+            <span>Match Stake & Accept</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- AI Jury Deliberation & Reveal Chamber Modal -->
+  <div class="modal-overlay" id="juryModalOverlay">
+    <div class="modal-container modal-lg">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-icon">⚖️</span>
+          <h3 id="juryModalTitle">GenLayer AI Jury Chamber</h3>
+        </div>
+        <button class="modal-close-btn" id="btnCloseJuryModal">&times;</button>
+      </div>
+
+      <div class="jury-chamber-content">
+        <!-- Topic & format header -->
+        <div class="chamber-header-meta">
+          <div class="chamber-badges">
+            <span class="badge format-badge" id="juryFormatBadge">ROAST BATTLE</span>
+            <span class="badge topic-badge" id="juryTopicBadge">TOPIC: Crypto VCs</span>
+            <span class="badge pot-badge" id="juryPotBadge">POT: 2.0 GEN</span>
+          </div>
+        </div>
+
+        <!-- Consensus Validator Visualization -->
+        <div class="consensus-validators-bar">
+          <div class="validator-node active" title="Leader Validator (0x5A42...)">
+            <span class="v-icon">🤖</span>
+            <span class="v-label">Leader</span>
+            <span class="v-vote agree">AGREE</span>
+          </div>
+          <div class="validator-node active" title="Validator 1 (0xA793...)">
+            <span class="v-icon">🤖</span>
+            <span class="v-label">Val 1</span>
+            <span class="v-vote agree">AGREE</span>
+          </div>
+          <div class="validator-node active" title="Validator 2 (0xcEf1...)">
+            <span class="v-icon">🤖</span>
+            <span class="v-label">Val 2</span>
+            <span class="v-vote agree">AGREE</span>
+          </div>
+          <div class="validator-node active" title="Validator 3 (0xcF5F...)">
+            <span class="v-icon">🤖</span>
+            <span class="v-label">Val 3</span>
+            <span class="v-vote agree">AGREE</span>
+          </div>
+          <div class="validator-node active" title="Validator 4 (0xE4E1...)">
+            <span class="v-icon">🤖</span>
+            <span class="v-label">Val 4</span>
+            <span class="v-vote agree">AGREE</span>
+          </div>
+        </div>
+
+        <!-- Face-Off Contenders Comparison -->
+        <div class="faceoff-grid">
+          <div class="contender-column" id="creatorColumn">
+            <div class="contender-header">
+              <span class="c-badge">CONTENDER 1 (CREATOR)</span>
+              <span class="c-addr" id="juryCreatorAddr">0x25b7...4ffd</span>
+            </div>
+            <div class="punchline-card" id="juryCreatorLine">"Your pitch deck has 4 slides: Problem, Solution, Team, and 'Powered by GenLayer'."</div>
+            <div class="score-gauge-wrap">
+              <div class="score-label">Jury Score: <span class="score-num" id="juryCreatorScore">9</span>/10</div>
+              <div class="gauge-bar"><div class="gauge-fill fill-creator" id="juryCreatorScoreBar" style="width: 90%;"></div></div>
+            </div>
+          </div>
+
+          <div class="versus-divider">
+            <div class="vs-circle">VS</div>
+          </div>
+
+          <div class="contender-column" id="opponentColumn">
+            <div class="contender-header">
+              <span class="c-badge">CONTENDER 2 (CHALLENGER)</span>
+              <span class="c-addr" id="juryOpponentAddr">0x5255...5e1a</span>
+            </div>
+            <div class="punchline-card" id="juryOpponentLine">"Your startup is so early your code comments are just thoughts and prayers."</div>
+            <div class="score-gauge-wrap">
+              <div class="score-label">Jury Score: <span class="score-num" id="juryOpponentScore">7</span>/10</div>
+              <div class="gauge-bar"><div class="gauge-fill fill-opponent" id="juryOpponentScoreBar" style="width: 70%;"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Verdict Banner -->
+        <div class="verdict-banner" id="verdictBanner">
+          <div class="winner-crown">👑</div>
+          <div class="winner-title" id="verdictWinnerText">CREATOR WINS!</div>
+          <div class="winner-payout" id="verdictPayoutText">2.0 GEN Payout credited to Winner Ledger</div>
+        </div>
+
+        <!-- AI Jury Critique Card -->
+        <div class="ai-critique-card">
+          <div class="critique-header">
+            <span class="critique-icon">📜</span>
+            <h4>Official GenLayer Jury Critique & Deliberation</h4>
+          </div>
+          <p class="critique-body" id="juryCritiqueText">
+            "Creator delivered a piercing observation on modern AI hype that felt painfully accurate, with superior comedic timing and punchline sharpness."
+          </p>
+          <div class="mvp-quote-wrap" id="juryMvpWrap">
+            <span class="mvp-badge">⭐ MVP Line:</span>
+            <span class="mvp-text" id="juryMvpQuote">"Problem, Solution, Team, and Powered by GenLayer"</span>
+          </div>
+        </div>
+
+        <!-- Action for Judging if not yet judged -->
+        <div class="jury-action-footer" id="juryActionFooter">
+          <button class="btn btn-primary btn-lg" id="btnExecuteJudge">
+            <span class="btn-icon">⚖️</span>
+            <span>Summon AI Jury Consensus</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-left">
+        <div class="brand">
+          <span class="logo-emblem">🔥</span>
+          <span class="logo-title">ROAST<span class="highlight">WARS</span></span>
+        </div>
+        <p class="footer-tagline">Autonomous on-chain comedy powered by GenLayer Intelligent Contracts.</p>
+      </div>
+
+      <div class="footer-right">
+        <a href="https://studio-next.genlayer.com" target="_blank" rel="noopener" class="footer-link">GenLayer Studio Next</a>
+        <a href="https://docs.genlayer.com" target="_blank" rel="noopener" class="footer-link">Documentation</a>
+        <a href="https://github.com/genlayerlabs" target="_blank" rel="noopener" class="footer-link">GitHub</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
