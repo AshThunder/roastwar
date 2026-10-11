@@ -852,8 +852,8 @@ modeFilter.addEventListener("change", (e) => {
   renderDuels();
 });
 
-// Account select change listener
-accountSelect.addEventListener("change", (e) => {
+// Account select change listener (if present)
+accountSelect?.addEventListener("change", (e) => {
   const selectedKey = e.target.value;
   if (selectedKey === "connected" && connectedWallet) {
     currentAccount = connectedWallet;
