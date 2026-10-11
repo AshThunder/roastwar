@@ -1,44 +1,45 @@
-# 🔥 RoastWars — Autonomous On-Chain AI Comedy Arena
+# RoastWars — Autonomous On-Chain AI Comedy Arena
 
 ![RoastWars Banner](assets/roast_wars_banner.jpg)
 
 > **Where Punchlines Meet Consensus.**  
-> An autonomous on-chain comedy & wit duel arena powered by **GenLayer Intelligent Contracts** and decentralized multi-validator AI consensus.
+> An autonomous on-chain comedy and wit duel arena powered by **GenLayer Intelligent Contracts** and decentralized multi-validator AI consensus.
 
 ---
 
-## 🏆 Project Overview
+## Project Overview
 
 **RoastWars** is a decentralized application built on **GenLayer** where comedians, degens, and wordsmiths wager native GEN tokens in 1-on-1 battles of wit.
 
 Traditional blockchains can only process deterministic math. They cannot judge whether a comedy roast was funny, whether a punchline made sense, or whether a comeback was sharper than the opening salvo. GenLayer changes this forever with **Intelligent Contracts** that run LLM prompts directly inside validator consensus.
 
 In RoastWars:
-1. **Contenders Create Duels**: Pick a target/topic (e.g., *"Crypto VCs"*, *"AI Startups"*, *"Solana Memecoin Degens"*), choose a format (**🔥 Roast Battle** or **💖 Compliment Duel**), drop an opening punchline, and deposit a wager stake in GEN.
+1. **Contenders Create Duels**: Pick a target/topic (e.g., *"Crypto VCs"*, *"AI Startups"*, *"Solana Memecoin Degens"*), choose a format (**Roast Battle** or **Compliment Duel**), drop an opening punchline, and deposit a wager stake in GEN.
 2. **Challengers Accept**: A rival matches the wager and delivers their counter-punchline.
-3. **GenLayer AI Jury Deliberates**: The contract summons the decentralized Grand AI Comedy Jury (`gl.vm.run_nondet_unsafe`). Five independent validator nodes prompt leading LLMs with strict comedic rubrics, score both contenders on a 0–10 scale, synthesize a hilarious critique, and vote on the winner.
+3. **GenLayer AI Jury Deliberates**: The contract summons the decentralized Grand AI Comedy Jury (`gl.vm.run_nondet_unsafe`). Five independent validator nodes prompt leading LLMs with strict comedic rubrics, score both contenders on a 0–10 scale, synthesize a critique, and vote on the winner.
 4. **On-Chain Payout**: Once majority consensus is achieved, the winner takes the entire 2x prize pot, credited programmatically to their internal ledger.
 
 ---
 
-## ⛓️ On-Chain Deployment Details (Studio Next)
+## On-Chain Deployment Details (StudioNet)
 
-RoastWars is live and verified on the **GenLayer Studio Next** network:
+RoastWars is live and verified on the **GenLayer StudioNet** network:
 
 | Property | Value |
 | :--- | :--- |
-| **Network** | **GenLayer Studio Next (`studio-dev`)** |
-| **Chain ID** | `61997` (`0xf22d`) |
-| **RPC Endpoint** | `https://studio-next.genlayer.com/api` |
-| **Deployed Contract Address** | [`0x4eA7372915658bdBd94cBB299F4B233913977a88`](https://studio-next.genlayer.com) |
-| **Deployment Transaction** | `0x68f399d42588d31f66ecacac48200247f6773e1485b1f378fac96a4940161757` |
-| **Deployer Account** | `0x8cbc478963705971f15052e579a8eb4faf7b2211` |
-| **GenVM Runner Version** | `py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng` (v0.6) |
+| **Network** | **GenLayer StudioNet (`studionet`)** |
+| **Chain ID** | `61999` (`0xf22f`) |
+| **RPC Endpoint** | `https://studio.genlayer.com/api` |
+| **Deployed Contract Address** | [`0xc3b21E949187120CdBd8f273F5d6b3d9963772eB`](https://studio.genlayer.com) |
+| **Deployment Transaction** | `0xb017543dc2fac927c66630aab5585bd77cd5bd5d99b04459255ab6f813548bbf` |
+| **Deployer Account** | `0x8cbc478963705971F15052e579a8Eb4faF7B2211` |
+| **Block Explorer** | [`explorer-studio.genlayer.com`](https://explorer-studio.genlayer.com) |
+| **GenVM Runner Version** | `py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6` |
 | **Consensus Mechanism** | Multi-Validator Equivalence (`gl.vm.run_nondet_unsafe`) |
 
 ---
 
-## 🧠 How GenLayer AI Consensus Works in RoastWars
+## How GenLayer AI Consensus Works in RoastWars
 
 In [`contracts/roast_wars.py`](contracts/roast_wars.py), the `judge_duel` function uses GenLayer's non-deterministic equivalence principle:
 
@@ -79,12 +80,12 @@ def judge_duel(self, duel_id: u256) -> None:
 ### Key Architectural Highlights
 - **Zero Gas & Internal Escrow**: Contenders deposit stakes directly through payable methods. Payouts are credited via internal ledger `_add_balance` (avoiding non-existent `gl.transfer`).
 - **Resilient JSON Parsing**: Fault-tolerant extraction with boundary substring parsing (`first "{"` and `last "}"`) to guarantee clean extraction across heterogeneous LLM models.
-- **Pinned Runner Header**: Compatible with Studio Next (v0.6) and local testing via `py-genlayer:5jycge4q...`.
+- **Pinned Runner Header**: Compatible with StudioNet (`py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6`).
 - **Equivalence Principle**: Bare `gl.nondet` calls are never invoked at the top level; all non-deterministic logic is isolated inside `run_nondet_unsafe` so validators can deterministically agree.
 
 ---
 
-## 🎯 Contract API Reference
+## Contract API Reference
 
 ### Write Methods (State-Modifying)
 - `create_duel(topic: str, mode: str, punchline: str) -> u256` *(payable)*: Creates a new duel with opening punchline and wager.
@@ -102,7 +103,7 @@ def judge_duel(self, duel_id: u256) -> None:
 
 ---
 
-## 🧪 Testing & Verification
+## Testing & Verification
 
 The contract includes a complete suite of in-memory direct mode tests validating all state transitions, boundary conditions, and LLM jury mocking:
 
@@ -132,38 +133,50 @@ genvm-lint lint contracts/roast_wars.py
 ```
 Output:
 ```
-✓ Lint passed (3 checks)
+[PASS] Lint passed (3 checks)
 ```
 
 ---
 
-## 💻 Frontend & Design System (Tic-Tac-Toe Arena Inspired)
+## Frontend & Design System (Neo-Brutalist Arena)
 
-The RoastWars web application features a high-impact **Neo-Brutalist Web3 Gaming Arena** aesthetic directly inspired by the design system of **Tic-Tac-Toe AI Arena** (`tictactoe-genlayer`):
+The RoastWars web application features a high-impact **Neo-Brutalist Web3 Gaming Arena** aesthetic:
 
 - **Neo-Brutalist Architecture**: Thick 3px/4px solid ink borders (`#1E293B`), sharp corners (`border-radius: 0px`), and hard offset drop shadows (`4px 4px 0px 0px #1E293B`, `6px 6px 0px 0px #1E293B`).
-- **Interactive Active States**: Buttons and cards depress with physical feel on hover/press (`transform: translate(2px, 2px)` and shadow shifts to fiery flame `#EA580C`).
-- **Space Grotesk Typography**: Punchy, high-contrast, uppercase headlines and buttons in **Space Grotesk** paired with **Inter** body text and **JetBrains Mono** for on-chain addresses and stakes.
+- **Lucide SVG Icons**: Crisp, uniform vector icons across all controls, stats cards, and badges.
+- **Web3 Wallet Connection (MetaMask / EIP-1193)**: Real wallet connection with automated StudioNet network switching (Chain ID 61999) and live GEN balance resolution.
+- **Space Grotesk Typography**: Punchy, high-contrast, uppercase headlines in **Space Grotesk** paired with **Inter** body text and **JetBrains Mono** for on-chain addresses and stakes.
 - **Live Marquee Ticker**: Continuous animated top banner highlighting arena rules, multi-validator LLM consensus, and prize pots.
-- **Arena Battle Cards**: Distinctive battle cards with `BATTLE #ID` header, stakes badges, side-by-side contender boxes, and winner crown highlights.
-- **Interactive AI Jury Chamber**: Live 5-validator consensus visualization (`gl.vm.run_nondet_unsafe`), visual score gauges, AI critique reveal, and winner crowning.
+- **Arena Battle Cards**: Distinctive battle cards with `BATTLE #ID` header, stakes badges, side-by-side contender boxes, and winner highlights.
+- **Interactive AI Jury Chamber**: Live 5-validator consensus animation (`gl.vm.run_nondet_unsafe`), visual score gauges, AI critique reveal, and winner crowning.
 
+### Local Development
 ```bash
-# Start a local web server in the app directory
-cd app
-python3 -m http.server 3033
+# Start local development server
+npm run dev
 ```
 
 Open your browser at `http://localhost:3033`:
 - **Browse Battle Lobby**: Filter open challenges, accepted battles, and resolved duels.
-- **Create Duel**: Set a target topic, format (Roast 🔥 or Compliment 💖), and enter your opening punchline.
+- **Connect Wallet**: Authenticate with MetaMask or any Web3 wallet.
+- **Create Duel**: Set a target topic, format (Roast or Compliment), and enter your opening punchline.
 - **Accept Challenge**: View creator's burn, write your counter-punchline, and match stake.
 - **AI Jury Chamber**: Watch live 5-validator consensus animation, visual score gauges, AI critique reveal, and winner crowning.
 - **Leaderboard**: Track top comedians by wins, win rate, high score, and GEN prize volume.
 
+### Vercel Deployment
+RoastWars is pre-configured for seamless deployment on Vercel via [`vercel.json`](vercel.json):
+```bash
+# Build the client bundle locally
+npm run build
+
+# Or deploy directly with Vercel CLI
+vercel --prod
+```
+
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```
 roast-wars/
@@ -172,19 +185,25 @@ roast-wars/
 ├── app/
 │   ├── index.html                 # Arena web application layout
 │   ├── style.css                  # Neo-Brutalist gaming arena design system
-│   └── app.js                     # Interactive controller & contract client
+│   ├── app.js                     # Interactive controller & contract client
+│   ├── lucide.min.js              # Standalone Lucide SVG icon engine
+│   └── genlayer-client.js         # Bundled GenLayer Web3 SDK
 ├── contracts/
-│   └── roast_wars.py              # GenLayer Intelligent Contract (v0.6 runner)
+│   └── roast_wars.py              # GenLayer Intelligent Contract (StudioNet)
 ├── tests/
 │   └── test_roast_wars.py         # 8/8 passing direct in-memory tests
 ├── scripts/
-│   └── deploy_studionext.mjs      # Deployment script for Studio Next
+│   ├── deploy_studionet.js        # Deployment script for StudioNet
+│   ├── create_duels.js            # Initial battle generation script
+│   └── resolve_duel_1.js          # Battle resolution test script
 ├── deployed_address.json          # Verified on-chain deployment metadata
+├── vercel.json                    # Vercel static deployment configuration
+├── package.json                   # Build and dependency scripts
 └── README.md                      # Complete project documentation
 ```
 
 ---
 
-## 📜 License
+## License
 
-MIT License. Built with ❤️ for the GenLayer Developer Ecosystem.
+MIT License. Built for the GenLayer Developer Ecosystem.
