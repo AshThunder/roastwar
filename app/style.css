@@ -1123,7 +1123,11 @@ button, input, select, textarea {
   box-shadow: 4px 4px 0px var(--primary);
 }
 
+.toggle-icon,
 .toggle-emoji {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 1.5rem;
 }
 
@@ -1659,4 +1663,137 @@ button, input, select, textarea {
 
 .btn-disconnect-wallet:hover {
   color: var(--accent-red);
+}
+
+/* ── Lucide SVG Icons Integration ── */
+i[data-lucide],
+svg.lucide {
+  display: inline-flex;
+  vertical-align: middle;
+  width: 1.15em;
+  height: 1.15em;
+  stroke-width: 2.25;
+  stroke: currentColor;
+  fill: none;
+}
+
+.m-item svg.lucide {
+  width: 1.15rem;
+  height: 1.15rem;
+  stroke: var(--primary);
+  margin-right: 0.35rem;
+  display: inline-block;
+  vertical-align: text-bottom;
+}
+
+.logo-emblem svg.lucide {
+  width: 1.5rem;
+  height: 1.5rem;
+  stroke: var(--primary);
+}
+
+.stat-icon svg.lucide {
+  width: 1.75rem;
+  height: 1.75rem;
+  stroke: var(--primary);
+}
+
+.modal-icon svg.lucide {
+  width: 1.4rem;
+  height: 1.4rem;
+  stroke: var(--primary);
+}
+
+.tag-icon svg.lucide,
+.info-icon svg.lucide {
+  width: 1.2rem;
+  height: 1.2rem;
+  stroke: var(--primary);
+}
+
+.btn svg.lucide,
+.btn-icon svg.lucide {
+  width: 1.1em;
+  height: 1.1em;
+  stroke-width: 2.25;
+}
+
+.v-icon svg.lucide {
+  width: 1.25rem;
+  height: 1.25rem;
+  stroke: var(--primary);
+}
+
+.winner-crown svg.lucide {
+  width: 2.5rem;
+  height: 2.5rem;
+  stroke: var(--accent-gold);
+}
+
+.winner-crown-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.winner-crown-tag svg.lucide {
+  width: 0.95rem;
+  height: 0.95rem;
+  stroke: var(--accent-gold);
+}
+
+.player-avatar svg.lucide {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.critique-icon svg.lucide {
+  width: 1.25rem;
+  height: 1.25rem;
+  stroke: var(--primary);
+}
+
+.mvp-badge svg.lucide {
+  width: 1rem;
+  height: 1rem;
+  stroke: var(--accent-gold);
+}
+
+.toast.toast-success, .toast.success {
+  border-left: 6px solid var(--accent-green);
+}
+.toast.toast-error, .toast.error {
+  border-left: 6px solid var(--accent-red);
+}
+.toast.toast-warning, .toast.warning {
+  border-left: 6px solid #F59E0B;
+}
+.toast.toast-info, .toast.info {
+  border-left: 6px solid var(--primary);
+}
+
+.toast-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toast.toast-success .toast-icon,
+.toast.success .toast-icon {
+  color: var(--accent-green);
+}
+
+.toast.toast-error .toast-icon,
+.toast.error .toast-icon {
+  color: var(--accent-red);
+}
+
+.toast.toast-warning .toast-icon,
+.toast.warning .toast-icon {
+  color: #F59E0B;
+}
+
+.toast.toast-info .toast-icon,
+.toast.info .toast-icon {
+  color: var(--primary);
 }

@@ -57,6 +57,13 @@ function formatAddr(addr) {
   return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 }
 
+// Helper: Refresh Lucide Icons across DOM
+function refreshIcons() {
+  if (typeof window !== "undefined" && window.lucide && typeof window.lucide.createIcons === "function") {
+    window.lucide.createIcons();
+  }
+}
+
 // Map Address to Known Display Name
 function getAccountName(addr) {
   if (!addr) return null;
@@ -193,7 +200,7 @@ async function fetchOnChainData(showToastNotification = false) {
     renderLeaderboard();
 
     if (showToastNotification) {
-      showToast(`🔄 Synced ${duels.length} on-chain battles from StudioNet!`, "success");
+      showToast(`Synced ${duels.length} on-chain battles from StudioNet!`, "success");
     }
   } catch (err) {
     console.error("Failed to fetch on-chain duels:", err);
@@ -221,7 +228,7 @@ async function updateAccountBalances(client) {
 // ── Connect & Disconnect Web3 Wallet (MetaMask / EIP-1193 / Snap) ──
 async function connectWallet() {
   if (!window.ethereum) {
-    showToast("🦊 MetaMask or Web3 wallet extension not found! Install MetaMask or use our pre-funded player accounts.", "error");
+    showToast("MetaMask or Web3 wallet extension not found! Install MetaMask or use our pre-funded player accounts.", "error");
     return;
   }
 
@@ -306,7 +313,7 @@ async function connectWallet() {
     if (balBadge) balBadge.textContent = balanceStr;
 
     await updateAccountBalances(getGenLayerClient());
-    showToast(`🦊 Connected: ${formatAddr(userAddress)} (${balanceStr})`, "success");
+    showToast(`Connected: ${formatAddr(userAddress)} (${balanceStr})`, "success");
   } catch (err) {
     console.error("Wallet connection failed:", err);
     showToast("Wallet connection failed: " + (err.message || err), "error");
@@ -361,12 +368,13 @@ function renderDuels() {
   if (filtered.length === 0) {
     duelsGrid.innerHTML = `
       <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; background: #FFFFFF; border: 3px dashed var(--border); box-shadow: var(--shadow-md);">
-        <div style="font-size: 44px; margin-bottom: 12px;">⚔️</div>
+        <div style="margin-bottom: 12px; color: var(--text-muted);"><i data-lucide="swords" style="width: 48px; height: 48px;"></i></div>
         <h3 style="font-family: var(--font-headline); font-size: 22px; margin-bottom: 8px;">NO DUELS MATCH THIS FILTER</h3>
         <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px; font-weight: 500;">Be the legend who ignites the arena with a new challenge!</p>
-        <button class="btn btn-primary" onclick="openCreateModal()">🔥 Ignite Duel</button>
+        <button class="btn btn-primary" onclick="openCreateModal()"><span class="btn-icon"><i data-lucide="zap"></i></span><span>Ignite Duel</span></button>
       </div>
     `;
+    refreshIcons();
     return;
   }
 
@@ -379,11 +387,11 @@ function renderDuels() {
 
     let actionBtn = "";
     if (isOpen) {
-      actionBtn = `<button class="btn btn-primary" onclick="openAcceptModal(${duel.id})">⚔️ Accept Challenge (${duel.stake} GEN)</button>`;
+      actionBtn = `<button class="btn btn-primary" onclick="openAcceptModal(${duel.id})"><span class="btn-icon"><i data-lucide="swords"></i></span><span>Accept Challenge (${duel.stake} GEN)</span></button>`;
     } else if (isAccepted) {
-      actionBtn = `<button class="btn btn-primary" onclick="openJuryModal(${duel.id})">⚖️ Summon AI Jury Consensus</button>`;
+      actionBtn = `<button class="btn btn-primary" onclick="openJuryModal(${duel.id})"><span class="btn-icon"><i data-lucide="scale"></i></span><span>Summon AI Jury Consensus</span></button>`;
     } else if (isResolved) {
-      actionBtn = `<button class="btn btn-secondary" onclick="openJuryModal(${duel.id})">🏆 View Jury Deliberation & Scores</button>`;
+      actionBtn = `<button class="btn btn-secondary" onclick="openJuryModal(${duel.id})"><span class="btn-icon"><i data-lucide="trophy"></i></span><span>View Jury Deliberation & Scores</span></button>`;
     }
 
     return `
@@ -392,7 +400,7 @@ function renderDuels() {
           <span class="duel-battle-id">BATTLE #${duel.id}</span>
           <div class="duel-badges-wrap">
             <span class="badge ${isRoast ? 'badge-roast' : 'badge-compliment'}">
-              ${isRoast ? '🔥 ROAST' : '💖 COMPLIMENT'}
+              ${isRoast ? '<i data-lucide="flame"></i> ROAST' : '<i data-lucide="heart"></i> COMPLIMENT'}
             </span>
             <span class="badge badge-status ${duel.status.toLowerCase()}">
               ${duel.status}
@@ -402,8 +410,8 @@ function renderDuels() {
 
         <div class="duel-card-body">
           <div class="duel-stakes-bar">
-            <span>💰 STAKE: ${duel.stake.toFixed(2)} GEN</span>
-            <span class="duel-pot-val">🏆 POT: ${pot.toFixed(2)} GEN</span>
+            <span><i data-lucide="coins"></i> STAKE: ${duel.stake.toFixed(2)} GEN</span>
+            <span class="duel-pot-val"><i data-lucide="trophy"></i> POT: ${pot.toFixed(2)} GEN</span>
           </div>
 
           <div class="duel-topic">${escapeHtml(duel.topic)}</div>
@@ -413,10 +421,10 @@ function renderDuels() {
             <div class="contender-box ${duel.winner && duel.winner.toLowerCase() === duel.creator.toLowerCase() ? 'winner-box' : ''}">
               <div class="contender-meta">
                 <span class="contender-role">
-                  <span>🎭</span> Creator: ${duel.creator_name || formatAddr(duel.creator)}
+                  <span><i data-lucide="user"></i></span> Creator: ${duel.creator_name || formatAddr(duel.creator)}
                 </span>
                 <div style="display: flex; gap: 4px; align-items: center;">
-                  ${isResolved && duel.winner && duel.winner.toLowerCase() === duel.creator.toLowerCase() ? '<span class="winner-crown-tag">👑 Victor</span>' : ''}
+                  ${isResolved && duel.winner && duel.winner.toLowerCase() === duel.creator.toLowerCase() ? '<span class="winner-crown-tag"><i data-lucide="crown"></i> Victor</span>' : ''}
                   ${isResolved ? `<span class="contender-score-pill">${duel.creator_score}/10</span>` : ''}
                 </div>
               </div>
@@ -428,10 +436,10 @@ function renderDuels() {
               <div class="contender-box ${duel.winner && duel.winner.toLowerCase() === duel.opponent.toLowerCase() ? 'winner-box' : ''}">
                 <div class="contender-meta">
                   <span class="contender-role">
-                    <span>⚔️</span> Challenger: ${duel.opponent_name || formatAddr(duel.opponent)}
+                    <span><i data-lucide="swords"></i></span> Challenger: ${duel.opponent_name || formatAddr(duel.opponent)}
                   </span>
                   <div style="display: flex; gap: 4px; align-items: center;">
-                    ${isResolved && duel.winner && duel.winner.toLowerCase() === duel.opponent.toLowerCase() ? '<span class="winner-crown-tag">👑 Victor</span>' : ''}
+                    ${isResolved && duel.winner && duel.winner.toLowerCase() === duel.opponent.toLowerCase() ? '<span class="winner-crown-tag"><i data-lucide="crown"></i> Victor</span>' : ''}
                     ${isResolved ? `<span class="contender-score-pill">${duel.opponent_score}/10</span>` : ''}
                   </div>
                 </div>
@@ -439,7 +447,7 @@ function renderDuels() {
               </div>
             ` : `
               <div class="awaiting-challenger-box">
-                <span>⏳ Awaiting opponent to match ${duel.stake.toFixed(2)} GEN stake...</span>
+                <span><i data-lucide="clock"></i> Awaiting opponent to match ${duel.stake.toFixed(2)} GEN stake...</span>
               </div>
             `}
           </div>
@@ -451,6 +459,7 @@ function renderDuels() {
       </div>
     `;
   }).join("");
+  refreshIcons();
 }
 
 // Render Leaderboard
@@ -506,7 +515,7 @@ function renderLeaderboard() {
         <td><span class="rank-badge ${rankClass}">#${index + 1}</span></td>
         <td>
           <div class="player-name-cell">
-            <span class="player-avatar">${index === 0 ? '👑' : '🎭'}</span>
+            <span class="player-avatar">${index === 0 ? '<i data-lucide="crown"></i>' : '<i data-lucide="user"></i>'}</span>
             <div>
               <strong>${p.name}</strong>
               <div class="player-addr-sub">${p.address}</div>
@@ -520,12 +529,13 @@ function renderLeaderboard() {
       </tr>
     `;
   }).join("");
+  refreshIcons();
 }
 
 // Modal Handlers (Require Connected Wallet)
 function openCreateModal() {
   if (!connectedWallet) {
-    showToast("🦊 Please connect your wallet first to ignite a duel!", "info");
+    showToast("Please connect your wallet first to ignite a duel!", "info");
     connectWallet();
     return;
   }
@@ -537,7 +547,7 @@ function closeCreateModal() {
 
 function openAcceptModal(duelId) {
   if (!connectedWallet) {
-    showToast("🦊 Please connect your wallet first to accept a challenge!", "info");
+    showToast("Please connect your wallet first to accept a challenge!", "info");
     connectWallet();
     return;
   }
@@ -564,7 +574,7 @@ function openJuryModal(duelId) {
   if (!duel) return;
 
   const pot = duel.stake * 2;
-  document.getElementById("juryFormatBadge").textContent = duel.mode === "ROAST" ? "🔥 ROAST BATTLE" : "💖 COMPLIMENT DUEL";
+  document.getElementById("juryFormatBadge").innerHTML = duel.mode === "ROAST" ? '<i data-lucide="flame"></i> ROAST BATTLE' : '<i data-lucide="heart"></i> COMPLIMENT DUEL';
   document.getElementById("juryTopicBadge").textContent = `TOPIC: ${duel.topic}`;
   document.getElementById("juryPotBadge").textContent = `POT: ${pot.toFixed(2)} GEN`;
 
@@ -588,11 +598,11 @@ function openJuryModal(duelId) {
 
   if (duel.status === "RESOLVED") {
     verdictBanner.style.display = "flex";
-    verdictWinnerText.textContent = duel.winning_side === "CREATOR"
-      ? `👑 ${duel.creator_name || 'CREATOR'} WINS!`
+    verdictWinnerText.innerHTML = duel.winning_side === "CREATOR"
+      ? `<i data-lucide="crown"></i> ${duel.creator_name || 'CREATOR'} WINS!`
       : duel.winning_side === "OPPONENT"
-      ? `👑 ${duel.opponent_name || 'CHALLENGER'} WINS!`
-      : `🤝 IT'S A COMEDY TIE!`;
+      ? `<i data-lucide="crown"></i> ${duel.opponent_name || 'CHALLENGER'} WINS!`
+      : `<i data-lucide="handshake"></i> IT'S A COMEDY TIE!`;
     verdictPayoutText.textContent = duel.winning_side === "TIE"
       ? `Pot split equally: ${(pot / 2).toFixed(2)} GEN to each contender`
       : `${pot.toFixed(2)} GEN prize pot transferred to winner's internal ledger`;
@@ -617,6 +627,7 @@ function openJuryModal(duelId) {
   }
 
   juryModal.classList.add("open");
+  refreshIcons();
 }
 function closeJuryModal() {
   juryModal.classList.remove("open");
@@ -625,7 +636,7 @@ function closeJuryModal() {
 // Execute AI Jury Consensus (Real On-Chain Write via GenLayer Validators)
 async function executeJudgeDuel(duelId) {
   if (!connectedWallet) {
-    showToast("🦊 Please connect your wallet first to summon the AI Jury!", "info");
+    showToast("Please connect your wallet first to summon the AI Jury!", "info");
     connectWallet();
     return;
   }
@@ -660,7 +671,7 @@ async function executeJudgeDuel(duelId) {
     btnJudge.innerHTML = `<span class="status-dot pulsing" style="background:#10b981;"></span> Reaching Consensus...`;
     await pollTransaction(client, hash, "Validators voting on punchlines...");
 
-    showToast("🏆 AI Jury Consensus finalized on-chain!", "success");
+    showToast("AI Jury Consensus finalized on-chain!", "success");
     await fetchOnChainData();
     openJuryModal(duelId);
   } catch (err) {
@@ -668,7 +679,8 @@ async function executeJudgeDuel(duelId) {
     showToast("AI Consensus failed: " + (err.message || err), "error");
   } finally {
     btnJudge.disabled = false;
-    btnJudge.innerHTML = `<span class="btn-icon">⚖️</span><span>Summon AI Jury Consensus</span>`;
+    btnJudge.innerHTML = `<span class="btn-icon"><i data-lucide="scale"></i></span><span>Summon AI Jury Consensus</span>`;
+    refreshIcons();
   }
 }
 
@@ -677,11 +689,13 @@ function showToast(message, type = "info") {
   const container = document.getElementById("toastContainer");
   const toast = document.createElement("div");
   toast.className = `toast toast-${type}`;
+  const iconName = type === 'success' ? 'check-circle' : type === 'error' ? 'alert-circle' : type === 'warning' ? 'alert-triangle' : 'info';
   toast.innerHTML = `
-    <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+    <span class="toast-icon"><i data-lucide="${iconName}"></i></span>
     <span>${message}</span>
   `;
   container.appendChild(toast);
+  refreshIcons();
 
   setTimeout(() => {
     toast.style.opacity = "0";
@@ -700,7 +714,7 @@ document.getElementById("createDuelForm").addEventListener("submit", async (e) =
   e.preventDefault();
 
   if (!connectedWallet) {
-    showToast("🦊 Please connect your wallet first!", "error");
+    showToast("Please connect your wallet first!", "error");
     connectWallet();
     return;
   }
@@ -736,14 +750,15 @@ document.getElementById("createDuelForm").addEventListener("submit", async (e) =
     document.getElementById("totalPotPreview").textContent = "2.0 GEN";
 
     await pollTransaction(client, hash, "Submitting new duel to StudioNet...");
-    showToast("⚡ Duel successfully created on-chain!", "success");
+    showToast("Duel successfully created on-chain!", "success");
     await fetchOnChainData();
   } catch (err) {
     console.error("Create Duel Error:", err);
     showToast("Failed to create duel: " + (err.message || err), "error");
   } finally {
     submitBtn.disabled = false;
-    submitBtn.innerHTML = `<span>🔥 Ignite Battle</span>`;
+    submitBtn.innerHTML = `<span class="btn-icon"><i data-lucide="zap"></i></span><span>Ignite Battle</span>`;
+    refreshIcons();
   }
 });
 
@@ -752,7 +767,7 @@ document.getElementById("acceptDuelForm").addEventListener("submit", async (e) =
   e.preventDefault();
 
   if (!connectedWallet) {
-    showToast("🦊 Please connect your wallet first!", "error");
+    showToast("Please connect your wallet first!", "error");
     connectWallet();
     return;
   }
@@ -780,14 +795,15 @@ document.getElementById("acceptDuelForm").addEventListener("submit", async (e) =
 
     closeAcceptModal();
     await pollTransaction(client, hash, "Matching duel wager on StudioNet...");
-    showToast("⚔️ Challenge matched on-chain! Duel ready for AI Jury.", "success");
+    showToast("Challenge matched on-chain! Duel ready for AI Jury.", "success");
     await fetchOnChainData();
   } catch (err) {
     console.error("Accept Duel Error:", err);
     showToast("Failed to accept duel: " + (err.message || err), "error");
   } finally {
     submitBtn.disabled = false;
-    submitBtn.innerHTML = `<span>⚔️ Lock Stake & Deliver Line</span>`;
+    submitBtn.innerHTML = `<span class="btn-icon"><i data-lucide="target"></i></span><span>Lock Stake & Deliver Line</span>`;
+    refreshIcons();
   }
 });
 
@@ -907,6 +923,7 @@ window.addEventListener("keydown", (e) => {
 
 // Initialize on Load: Check already authorized wallet & Fetch Live On-Chain Data
 window.addEventListener("DOMContentLoaded", async () => {
+  refreshIcons();
   fetchOnChainData();
 
   // Auto-detect if user already authorized MetaMask/Web3 wallet

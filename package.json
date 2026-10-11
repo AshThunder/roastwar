@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "python3 -m http.server 3033 --directory app",
+    "build": "npm run build:client",
     "build:client": "npx esbuild src/browser_client.js --bundle --outfile=app/genlayer-client.js --format=iife --define:process.env.NODE_ENV='\"production\"'",
     "test": "pytest"
   },
@@ -18,5 +19,8 @@
   "dependencies": {
     "genlayer-js": "^1.1.8",
     "viem": "^2.57.4"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
   }
 }
