@@ -1578,3 +1578,85 @@ button, input, select, textarea {
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Wallet Connect (AdPact style Neo-Brutalist) ── */
+.wallet-container {
+  display: flex;
+  align-items: center;
+}
+
+.btn-wallet {
+  background: #FFF7ED;
+  color: var(--primary);
+  border: 2px solid var(--border);
+  box-shadow: 2px 2px 0px var(--border);
+  font-family: var(--font-headline);
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.45rem 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.1s ease;
+}
+
+.btn-wallet:hover {
+  background: var(--primary);
+  color: #FFFFFF;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px var(--border);
+}
+
+.connected-wallet-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #FFFFFF;
+  border: 2px solid var(--border);
+  box-shadow: 2px 2px 0px var(--border);
+  padding: 0.35rem 0.65rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.wallet-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-green);
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.3);
+}
+
+.wallet-addr-text {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.wallet-bal-badge {
+  background: #FEF3C7;
+  color: #92400E;
+  padding: 0.15rem 0.4rem;
+  border: 1px solid #F59E0B;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.btn-disconnect-wallet {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0 0.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.1s ease;
+}
+
+.btn-disconnect-wallet:hover {
+  color: var(--accent-red);
+}

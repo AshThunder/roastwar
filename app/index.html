@@ -68,9 +68,24 @@
       </div>
 
       <div class="nav-right">
+        <!-- Connect Wallet Button & Connected Pill (AdPact style) -->
+        <div id="walletContainer" class="wallet-container">
+          <button class="btn btn-wallet" id="btnConnectWallet" title="Connect MetaMask or Web3 Wallet">
+            <span class="btn-icon">🦊</span>
+            <span id="connectWalletBtnText">Connect Wallet</span>
+          </button>
+          <div id="connectedWalletPill" class="connected-wallet-pill" style="display: none;">
+            <div class="wallet-status-dot"></div>
+            <span class="wallet-addr-text" id="connectedWalletAddr">0x0000...0000</span>
+            <span class="wallet-bal-badge" id="connectedWalletBal">0.00 GEN</span>
+            <button class="btn-disconnect-wallet" id="btnDisconnectWallet" title="Disconnect wallet">✕</button>
+          </div>
+        </div>
+
         <div class="account-selector-wrapper">
           <label for="accountSelect" class="sr-only">Select Player Account</label>
           <select id="accountSelect" class="account-select">
+            <option value="connected" id="connectedAccountOption" style="display: none;">🦊 Connected Wallet</option>
             <option value="deployer">Deployer (0x8cbc...2211) • 1,000 GEN</option>
             <option value="alice">Alice The Savage (0x25b7...4ffd) • 1,007,426 GEN</option>
           </select>

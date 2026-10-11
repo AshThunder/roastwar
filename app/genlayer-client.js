@@ -38388,7 +38388,8 @@ ${prettyStateOverride(stateOverride)}`;
     studionet,
     privateKeyToAccount,
     parseEther,
-    formatEther: formatEther2
+    formatEther: formatEther2,
+    custom
   };
 })();
 /*! Bundled license information:

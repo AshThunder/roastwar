@@ -29,6 +29,7 @@ const ACCOUNTS = {
 };
 
 let currentAccount = ACCOUNTS.deployer;
+let connectedWallet = null;
 
 // Live On-Chain Duels Store (Populated exclusively from GenLayer Contract)
 let duels = [];
@@ -69,23 +70,45 @@ function formatAddr(addr) {
 // Map Address to Known Display Name
 function getAccountName(addr) {
   if (!addr) return null;
+  if (connectedWallet && connectedWallet.address.toLowerCase() === addr.toLowerCase()) {
+    return `You (${formatAddr(addr)})`;
+  }
   const match = Object.values(ACCOUNTS).find(a => a.address.toLowerCase() === addr.toLowerCase());
   return match ? match.name : formatAddr(addr);
 }
 
-// GenLayer Client Factory
+// GenLayer Client Factory (Supports both EIP-1193 MetaMask & Pre-funded Accounts)
 function getGenLayerClient(accountObj = null) {
   if (!window.GenLayer) {
     throw new Error("GenLayer Web Client SDK is initializing. Please try again in a moment.");
   }
-  const opts = {
+  
+  // 1. Injected Web3 Wallet (MetaMask) signing
+  if (accountObj && accountObj.isWeb3 && window.ethereum) {
+    const transport = window.GenLayer.custom 
+      ? window.GenLayer.custom(window.ethereum) 
+      : CONTRACT_CONFIG.rpcUrl;
+    return window.GenLayer.createClient({
+      chain: window.GenLayer.studionet,
+      transport: transport,
+      account: accountObj.address
+    });
+  }
+
+  // 2. Pre-funded Keystore / Private Key signing
+  if (accountObj && accountObj.privateKey) {
+    return window.GenLayer.createClient({
+      chain: window.GenLayer.studionet,
+      transport: CONTRACT_CONFIG.rpcUrl,
+      account: window.GenLayer.privateKeyToAccount(accountObj.privateKey)
+    });
+  }
+
+  // 3. Default Read-Only Client
+  return window.GenLayer.createClient({
     chain: window.GenLayer.studionet,
     transport: CONTRACT_CONFIG.rpcUrl
-  };
-  if (accountObj && accountObj.privateKey) {
-    opts.account = window.GenLayer.privateKeyToAccount(accountObj.privateKey);
-  }
-  return window.GenLayer.createClient(opts);
+  });
 }
 
 // Transaction Polling Helper
@@ -209,18 +232,144 @@ async function updateAccountBalances(client) {
       acc.balance = `${balGen.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 2 })} GEN`;
     }
 
+    if (connectedWallet) {
+      try {
+        const balWei = await client.getBalance({ address: connectedWallet.address });
+        const balGen = parseFloat(window.GenLayer.formatEther(balWei));
+        connectedWallet.balance = `${balGen.toFixed(2)} GEN`;
+        const balBadge = document.getElementById("connectedWalletBal");
+        if (balBadge) balBadge.textContent = connectedWallet.balance;
+      } catch (_) {}
+    }
+
     // Update select options
     const select = document.getElementById("accountSelect");
     if (select) {
-      select.innerHTML = Object.keys(ACCOUNTS).map(k => {
+      const connectedHtml = connectedWallet 
+        ? `<option value="connected" ${currentAccount === connectedWallet ? 'selected' : ''}>🦊 Connected (${formatAddr(connectedWallet.address)}) • ${connectedWallet.balance}</option>`
+        : `<option value="connected" id="connectedAccountOption" style="display: none;">🦊 Connected Wallet</option>`;
+
+      const devAccountsHtml = Object.keys(ACCOUNTS).map(k => {
         const a = ACCOUNTS[k];
         const isSelected = currentAccount.address.toLowerCase() === a.address.toLowerCase();
         return `<option value="${k}" ${isSelected ? 'selected' : ''}>${a.name} (${formatAddr(a.address)}) • ${a.balance}</option>`;
       }).join("");
+
+      select.innerHTML = connectedHtml + devAccountsHtml;
     }
   } catch (e) {
     console.warn("Balance update warning:", e);
   }
+}
+
+// ── Connect & Disconnect Web3 Wallet (MetaMask / EIP-1193 / Snap) ──
+async function connectWallet() {
+  if (!window.ethereum) {
+    showToast("🦊 MetaMask or Web3 wallet extension not found! Install MetaMask or use our pre-funded player accounts.", "error");
+    return;
+  }
+
+  const btnText = document.getElementById("connectWalletBtnText");
+  if (btnText) btnText.textContent = "Connecting...";
+
+  try {
+    showToast("Requesting wallet connection...", "info");
+    const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+    if (!accounts || accounts.length === 0) {
+      if (btnText) btnText.textContent = "Connect Wallet";
+      return;
+    }
+
+    const userAddress = accounts[0];
+
+    // Automatically prompt network add/switch to GenLayer StudioNet (Chain ID 61999)
+    const chainIdHex = "0x" + (61999).toString(16);
+    try {
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: chainIdHex }],
+      });
+    } catch (switchErr) {
+      if (switchErr.code === 4902 || switchErr.message?.includes("Unrecognized") || switchErr.message?.includes("wallet_addEthereumChain")) {
+        try {
+          await window.ethereum.request({
+            method: "wallet_addEthereumChain",
+            params: [{
+              chainId: chainIdHex,
+              chainName: "GenLayer StudioNet",
+              rpcUrls: ["https://studio.genlayer.com/api"],
+              nativeCurrency: { name: "GEN", symbol: "GEN", decimals: 18 },
+              blockExplorerUrls: ["https://genlayer-explorer.vercel.app"]
+            }],
+          });
+        } catch (addErr) {
+          console.warn("Network add error:", addErr);
+        }
+      }
+    }
+
+    // Attempt GenLayer snap connect if supported
+    try {
+      const client = getGenLayerClient();
+      if (typeof client.connect === 'function') {
+        await client.connect('studionet');
+      }
+    } catch (snapErr) {
+      console.log("Snap note:", snapErr);
+    }
+
+    // Fetch initial balance
+    let balanceStr = "0.00 GEN";
+    try {
+      const client = getGenLayerClient();
+      const balWei = await client.getBalance({ address: userAddress });
+      const balGen = parseFloat(window.GenLayer.formatEther(balWei));
+      balanceStr = `${balGen.toFixed(2)} GEN`;
+    } catch (bErr) {
+      console.warn("Balance fetch:", bErr);
+    }
+
+    connectedWallet = {
+      address: userAddress,
+      name: `Connected Wallet (${formatAddr(userAddress)})`,
+      balance: balanceStr,
+      isWeb3: true
+    };
+
+    currentAccount = connectedWallet;
+
+    // Update UI elements
+    const btnConnect = document.getElementById("btnConnectWallet");
+    const pill = document.getElementById("connectedWalletPill");
+    const addrText = document.getElementById("connectedWalletAddr");
+    const balBadge = document.getElementById("connectedWalletBal");
+
+    if (btnConnect) btnConnect.style.display = "none";
+    if (pill) pill.style.display = "inline-flex";
+    if (addrText) addrText.textContent = formatAddr(userAddress);
+    if (balBadge) balBadge.textContent = balanceStr;
+
+    await updateAccountBalances(getGenLayerClient());
+    showToast(`🦊 Connected: ${formatAddr(userAddress)} (${balanceStr})`, "success");
+  } catch (err) {
+    console.error("Wallet connection failed:", err);
+    showToast("Wallet connection failed: " + (err.message || err), "error");
+  } finally {
+    if (btnText) btnText.textContent = "Connect Wallet";
+  }
+}
+
+function disconnectWallet() {
+  connectedWallet = null;
+  currentAccount = ACCOUNTS.deployer;
+
+  const btnConnect = document.getElementById("btnConnectWallet");
+  const pill = document.getElementById("connectedWalletPill");
+  if (btnConnect) btnConnect.style.display = "inline-flex";
+  if (pill) pill.style.display = "none";
+
+  updateAccountBalances(getGenLayerClient());
+  showToast("Wallet disconnected. Switched to Deployer Host.", "info");
 }
 
 // Update Top Stats & Tab Badges
@@ -706,11 +855,40 @@ modeFilter.addEventListener("change", (e) => {
 // Account select change listener
 accountSelect.addEventListener("change", (e) => {
   const selectedKey = e.target.value;
-  if (ACCOUNTS[selectedKey]) {
+  if (selectedKey === "connected" && connectedWallet) {
+    currentAccount = connectedWallet;
+    showToast(`Active player: Connected Wallet (${formatAddr(connectedWallet.address)})`, "info");
+  } else if (ACCOUNTS[selectedKey]) {
     currentAccount = ACCOUNTS[selectedKey];
     showToast(`Switched active player: ${currentAccount.name}`, "info");
   }
 });
+
+// Connect / Disconnect Wallet Button Listeners
+document.getElementById("btnConnectWallet")?.addEventListener("click", connectWallet);
+document.getElementById("btnDisconnectWallet")?.addEventListener("click", disconnectWallet);
+
+// EIP-1193 Event Listeners
+if (typeof window !== "undefined" && window.ethereum) {
+  window.ethereum.on?.("accountsChanged", (accounts) => {
+    if (!accounts || accounts.length === 0) {
+      disconnectWallet();
+    } else {
+      connectedWallet = {
+        address: accounts[0],
+        name: `Connected Wallet (${formatAddr(accounts[0])})`,
+        balance: "0.00 GEN",
+        isWeb3: true
+      };
+      currentAccount = connectedWallet;
+      updateAccountBalances(getGenLayerClient());
+    }
+  });
+
+  window.ethereum.on?.("chainChanged", () => {
+    fetchOnChainData();
+  });
+}
 
 // Sync on-chain button
 document.getElementById("btnSyncOnChain")?.addEventListener("click", () => {
