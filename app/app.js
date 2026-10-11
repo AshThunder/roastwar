@@ -12,23 +12,13 @@ const CONTRACT_CONFIG = {
   networkName: "GenLayer StudioNet"
 };
 
-// Player profiles available with unlocked keystores for testing
-const ACCOUNTS = {
-  deployer: {
-    address: "0x8cbc478963705971F15052e579a8Eb4faF7B2211",
-    privateKey: "0x1052b5c67ac26e29a640e4c3024a5df170ae387ae942a6059a37016f31f4f521",
-    name: "Deployer Host",
-    balance: "1,000.00 GEN"
-  },
-  alice: {
-    address: "0x25b7a7d21cCf349fbA8245209A25Bbb36fBe4ffD",
-    privateKey: "0x7d8fcfb7d83c869cd0bb3097062b1e798ea1a4c18a500e6bff5de4d56c1163db",
-    name: "Alice The Savage",
-    balance: "1,007,426.00 GEN"
-  }
+// Known player labels for leaderboard display
+const KNOWN_PLAYERS = {
+  "0x8cbc478963705971F15052e579a8Eb4faF7B2211": "Deployer Host",
+  "0x25b7a7d21cCf349fbA8245209A25Bbb36fBe4ffD": "Alice The Savage"
 };
 
-let currentAccount = ACCOUNTS.deployer;
+let currentAccount = null;
 let connectedWallet = null;
 
 // Live On-Chain Duels Store (Populated exclusively from GenLayer Contract)
@@ -73,18 +63,18 @@ function getAccountName(addr) {
   if (connectedWallet && connectedWallet.address.toLowerCase() === addr.toLowerCase()) {
     return `You (${formatAddr(addr)})`;
   }
-  const match = Object.values(ACCOUNTS).find(a => a.address.toLowerCase() === addr.toLowerCase());
-  return match ? match.name : formatAddr(addr);
+  const match = Object.keys(KNOWN_PLAYERS).find(k => k.toLowerCase() === addr.toLowerCase());
+  return match ? KNOWN_PLAYERS[match] : formatAddr(addr);
 }
 
-// GenLayer Client Factory (Supports both EIP-1193 MetaMask & Pre-funded Accounts)
+// GenLayer Client Factory (100% MetaMask / EIP-1193 Web3 Signing)
 function getGenLayerClient(accountObj = null) {
   if (!window.GenLayer) {
     throw new Error("GenLayer Web Client SDK is initializing. Please try again in a moment.");
   }
   
-  // 1. Injected Web3 Wallet (MetaMask) signing
-  if (accountObj && accountObj.isWeb3 && window.ethereum) {
+  // Injected Web3 Wallet (MetaMask) signing
+  if (accountObj && accountObj.address && window.ethereum) {
     const transport = window.GenLayer.custom 
       ? window.GenLayer.custom(window.ethereum) 
       : CONTRACT_CONFIG.rpcUrl;
@@ -95,16 +85,7 @@ function getGenLayerClient(accountObj = null) {
     });
   }
 
-  // 2. Pre-funded Keystore / Private Key signing
-  if (accountObj && accountObj.privateKey) {
-    return window.GenLayer.createClient({
-      chain: window.GenLayer.studionet,
-      transport: CONTRACT_CONFIG.rpcUrl,
-      account: window.GenLayer.privateKeyToAccount(accountObj.privateKey)
-    });
-  }
-
-  // 3. Default Read-Only Client
+  // Default Read-Only Client
   return window.GenLayer.createClient({
     chain: window.GenLayer.studionet,
     transport: CONTRACT_CONFIG.rpcUrl
@@ -225,37 +206,12 @@ async function fetchOnChainData(showToastNotification = false) {
 // Live Account Balance Syncer
 async function updateAccountBalances(client) {
   try {
-    for (const key of Object.keys(ACCOUNTS)) {
-      const acc = ACCOUNTS[key];
-      const balWei = await client.getBalance({ address: acc.address });
-      const balGen = parseFloat(window.GenLayer.formatEther(balWei));
-      acc.balance = `${balGen.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 2 })} GEN`;
-    }
-
     if (connectedWallet) {
-      try {
-        const balWei = await client.getBalance({ address: connectedWallet.address });
-        const balGen = parseFloat(window.GenLayer.formatEther(balWei));
-        connectedWallet.balance = `${balGen.toFixed(2)} GEN`;
-        const balBadge = document.getElementById("connectedWalletBal");
-        if (balBadge) balBadge.textContent = connectedWallet.balance;
-      } catch (_) {}
-    }
-
-    // Update select options
-    const select = document.getElementById("accountSelect");
-    if (select) {
-      const connectedHtml = connectedWallet 
-        ? `<option value="connected" ${currentAccount === connectedWallet ? 'selected' : ''}>🦊 Connected (${formatAddr(connectedWallet.address)}) • ${connectedWallet.balance}</option>`
-        : `<option value="connected" id="connectedAccountOption" style="display: none;">🦊 Connected Wallet</option>`;
-
-      const devAccountsHtml = Object.keys(ACCOUNTS).map(k => {
-        const a = ACCOUNTS[k];
-        const isSelected = currentAccount.address.toLowerCase() === a.address.toLowerCase();
-        return `<option value="${k}" ${isSelected ? 'selected' : ''}>${a.name} (${formatAddr(a.address)}) • ${a.balance}</option>`;
-      }).join("");
-
-      select.innerHTML = connectedHtml + devAccountsHtml;
+      const balWei = await client.getBalance({ address: connectedWallet.address });
+      const balGen = parseFloat(window.GenLayer.formatEther(balWei));
+      connectedWallet.balance = `${balGen.toFixed(2)} GEN`;
+      const balBadge = document.getElementById("connectedWalletBal");
+      if (balBadge) balBadge.textContent = connectedWallet.balance;
     }
   } catch (e) {
     console.warn("Balance update warning:", e);
@@ -361,15 +317,14 @@ async function connectWallet() {
 
 function disconnectWallet() {
   connectedWallet = null;
-  currentAccount = ACCOUNTS.deployer;
+  currentAccount = null;
 
   const btnConnect = document.getElementById("btnConnectWallet");
   const pill = document.getElementById("connectedWalletPill");
   if (btnConnect) btnConnect.style.display = "inline-flex";
   if (pill) pill.style.display = "none";
 
-  updateAccountBalances(getGenLayerClient());
-  showToast("Wallet disconnected. Switched to Deployer Host.", "info");
+  showToast("Wallet disconnected.", "info");
 }
 
 // Update Top Stats & Tab Badges
@@ -502,11 +457,11 @@ function renderDuels() {
 function renderLeaderboard() {
   const playerStats = {};
 
-  // Build aggregate records from registered accounts
-  Object.values(ACCOUNTS).forEach(acc => {
-    playerStats[acc.address.toLowerCase()] = {
-      address: acc.address,
-      name: acc.name,
+  // Build aggregate records from known players
+  Object.keys(KNOWN_PLAYERS).forEach(addr => {
+    playerStats[addr.toLowerCase()] = {
+      address: addr,
+      name: KNOWN_PLAYERS[addr],
       wins: 0,
       losses: 0,
       totalEarned: 0,
@@ -567,8 +522,13 @@ function renderLeaderboard() {
   }).join("");
 }
 
-// Modal Handlers
+// Modal Handlers (Require Connected Wallet)
 function openCreateModal() {
+  if (!connectedWallet) {
+    showToast("🦊 Please connect your wallet first to ignite a duel!", "info");
+    connectWallet();
+    return;
+  }
   createModal.classList.add("open");
 }
 function closeCreateModal() {
@@ -576,6 +536,12 @@ function closeCreateModal() {
 }
 
 function openAcceptModal(duelId) {
+  if (!connectedWallet) {
+    showToast("🦊 Please connect your wallet first to accept a challenge!", "info");
+    connectWallet();
+    return;
+  }
+
   const duel = duels.find(d => d.id === duelId);
   if (!duel) return;
 
@@ -658,6 +624,12 @@ function closeJuryModal() {
 
 // Execute AI Jury Consensus (Real On-Chain Write via GenLayer Validators)
 async function executeJudgeDuel(duelId) {
+  if (!connectedWallet) {
+    showToast("🦊 Please connect your wallet first to summon the AI Jury!", "info");
+    connectWallet();
+    return;
+  }
+
   const duel = duels.find(d => d.id === duelId);
   if (!duel) return;
 
@@ -727,6 +699,12 @@ function escapeHtml(str) {
 document.getElementById("createDuelForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
+  if (!connectedWallet) {
+    showToast("🦊 Please connect your wallet first!", "error");
+    connectWallet();
+    return;
+  }
+
   const topic = document.getElementById("duelTopic").value.trim();
   const mode = document.querySelector('input[name="duelMode"]:checked').value;
   const punchline = document.getElementById("creatorPunchline").value.trim();
@@ -772,6 +750,12 @@ document.getElementById("createDuelForm").addEventListener("submit", async (e) =
 // Form Handlers: Real On-Chain Accept Duel
 document.getElementById("acceptDuelForm").addEventListener("submit", async (e) => {
   e.preventDefault();
+
+  if (!connectedWallet) {
+    showToast("🦊 Please connect your wallet first!", "error");
+    connectWallet();
+    return;
+  }
 
   const duelId = parseInt(document.getElementById("acceptDuelId").value);
   const punchline = document.getElementById("opponentPunchline").value.trim();
@@ -852,17 +836,6 @@ modeFilter.addEventListener("change", (e) => {
   renderDuels();
 });
 
-// Account select change listener (if present)
-accountSelect?.addEventListener("change", (e) => {
-  const selectedKey = e.target.value;
-  if (selectedKey === "connected" && connectedWallet) {
-    currentAccount = connectedWallet;
-    showToast(`Active player: Connected Wallet (${formatAddr(connectedWallet.address)})`, "info");
-  } else if (ACCOUNTS[selectedKey]) {
-    currentAccount = ACCOUNTS[selectedKey];
-    showToast(`Switched active player: ${currentAccount.name}`, "info");
-  }
-});
 
 // Connect / Disconnect Wallet Button Listeners
 document.getElementById("btnConnectWallet")?.addEventListener("click", connectWallet);
@@ -932,7 +905,44 @@ window.addEventListener("keydown", (e) => {
   });
 });
 
-// Initialize on Load: Fetch Live On-Chain Data
-window.addEventListener("DOMContentLoaded", () => {
+// Initialize on Load: Check already authorized wallet & Fetch Live On-Chain Data
+window.addEventListener("DOMContentLoaded", async () => {
   fetchOnChainData();
+
+  // Auto-detect if user already authorized MetaMask/Web3 wallet
+  if (typeof window !== "undefined" && window.ethereum) {
+    try {
+      const accounts = await window.ethereum.request({ method: "eth_accounts" });
+      if (accounts && accounts.length > 0) {
+        const userAddress = accounts[0];
+        let balanceStr = "0.00 GEN";
+        try {
+          const client = getGenLayerClient();
+          const balWei = await client.getBalance({ address: userAddress });
+          const balGen = parseFloat(window.GenLayer.formatEther(balWei));
+          balanceStr = `${balGen.toFixed(2)} GEN`;
+        } catch (_) {}
+
+        connectedWallet = {
+          address: userAddress,
+          name: `Connected Wallet (${formatAddr(userAddress)})`,
+          balance: balanceStr,
+          isWeb3: true
+        };
+        currentAccount = connectedWallet;
+
+        const btnConnect = document.getElementById("btnConnectWallet");
+        const pill = document.getElementById("connectedWalletPill");
+        const addrText = document.getElementById("connectedWalletAddr");
+        const balBadge = document.getElementById("connectedWalletBal");
+
+        if (btnConnect) btnConnect.style.display = "none";
+        if (pill) pill.style.display = "inline-flex";
+        if (addrText) addrText.textContent = formatAddr(userAddress);
+        if (balBadge) balBadge.textContent = balanceStr;
+      }
+    } catch (err) {
+      console.warn("Auto-connect check:", err);
+    }
+  }
 });
