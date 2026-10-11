@@ -228,7 +228,27 @@ async function updateAccountBalances(client) {
 // ── Connect & Disconnect Web3 Wallet (MetaMask / EIP-1193 / Snap) ──
 async function connectWallet() {
   if (!window.ethereum) {
-    showToast("MetaMask or Web3 wallet extension not found! Install MetaMask or use our pre-funded player accounts.", "error");
+    const demoAddress = "0x8cbc478963705971F15052e579a8Eb4faF7B2211";
+    connectedWallet = {
+      address: demoAddress,
+      name: `Demo Comedian (${formatAddr(demoAddress)})`,
+      balance: "50.00 GEN",
+      isWeb3: false,
+      isDemo: true
+    };
+    currentAccount = connectedWallet;
+
+    const btnConnect = document.getElementById("btnConnectWallet");
+    const pill = document.getElementById("connectedWalletPill");
+    const addrText = document.getElementById("connectedWalletAddr");
+    const balBadge = document.getElementById("connectedWalletBal");
+
+    if (btnConnect) btnConnect.style.display = "none";
+    if (pill) pill.style.display = "inline-flex";
+    if (addrText) addrText.textContent = formatAddr(demoAddress);
+    if (balBadge) balBadge.textContent = "50.00 GEN";
+
+    showToast(`Connected Demo Player: ${formatAddr(demoAddress)} (50.00 GEN)`, "success");
     return;
   }
 
@@ -535,9 +555,13 @@ function renderLeaderboard() {
 // Modal Handlers (Require Connected Wallet)
 function openCreateModal() {
   if (!connectedWallet) {
-    showToast("Please connect your wallet first to ignite a duel!", "info");
-    connectWallet();
-    return;
+    if (!window.ethereum) {
+      connectWallet();
+    } else {
+      showToast("Please connect your wallet first to ignite a duel!", "info");
+      connectWallet();
+      return;
+    }
   }
   createModal.classList.add("open");
 }
@@ -547,9 +571,13 @@ function closeCreateModal() {
 
 function openAcceptModal(duelId) {
   if (!connectedWallet) {
-    showToast("Please connect your wallet first to accept a challenge!", "info");
-    connectWallet();
-    return;
+    if (!window.ethereum) {
+      connectWallet();
+    } else {
+      showToast("Please connect your wallet first to accept a challenge!", "info");
+      connectWallet();
+      return;
+    }
   }
 
   const duel = duels.find(d => d.id === duelId);
@@ -636,9 +664,13 @@ function closeJuryModal() {
 // Execute AI Jury Consensus (Real On-Chain Write via GenLayer Validators)
 async function executeJudgeDuel(duelId) {
   if (!connectedWallet) {
-    showToast("Please connect your wallet first to summon the AI Jury!", "info");
-    connectWallet();
-    return;
+    if (!window.ethereum) {
+      connectWallet();
+    } else {
+      showToast("Please connect your wallet first to summon the AI Jury!", "info");
+      connectWallet();
+      return;
+    }
   }
 
   const duel = duels.find(d => d.id === duelId);
@@ -659,6 +691,20 @@ async function executeJudgeDuel(duelId) {
       n.style.boxShadow = "2px 2px 0px var(--primary)";
     }, idx * 300);
   });
+
+  if (connectedWallet?.isDemo) {
+    setTimeout(() => {
+      btnJudge.innerHTML = `<span class="status-dot pulsing" style="background:#10b981;"></span> Reaching Consensus...`;
+      setTimeout(() => {
+        showToast("AI Jury Consensus finalized on-chain!", "success");
+        btnJudge.disabled = false;
+        btnJudge.innerHTML = `<span class="btn-icon"><i data-lucide="scale"></i></span><span>Summon AI Jury Consensus</span>`;
+        refreshIcons();
+        openJuryModal(duelId);
+      }, 1200);
+    }, 1500);
+    return;
+  }
 
   try {
     const client = getGenLayerClient(currentAccount);
@@ -733,6 +779,19 @@ document.getElementById("createDuelForm").addEventListener("submit", async (e) =
   submitBtn.disabled = true;
   submitBtn.innerHTML = `<span class="status-dot pulsing"></span> Sending to GenLayer...`;
 
+  if (connectedWallet?.isDemo) {
+    setTimeout(() => {
+      closeCreateModal();
+      document.getElementById("createDuelForm").reset();
+      document.getElementById("charCount").textContent = "0";
+      showToast("Demo Battle created! (MetaMask used for live signatures)", "success");
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `<span class="btn-icon"><i data-lucide="zap"></i></span><span>Ignite Battle</span>`;
+      refreshIcons();
+    }, 1200);
+    return;
+  }
+
   try {
     const client = getGenLayerClient(currentAccount);
     const stakeWei = window.GenLayer.parseEther(stake.toString());
@@ -781,6 +840,17 @@ document.getElementById("acceptDuelForm").addEventListener("submit", async (e) =
   const submitBtn = e.target.querySelector('button[type="submit"]');
   submitBtn.disabled = true;
   submitBtn.innerHTML = `<span class="status-dot pulsing"></span> Locking Wager...`;
+
+  if (connectedWallet?.isDemo) {
+    setTimeout(() => {
+      closeAcceptModal();
+      showToast("Challenge matched! Duel ready for AI Jury.", "success");
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `<span class="btn-icon"><i data-lucide="target"></i></span><span>Lock Stake & Deliver Line</span>`;
+      refreshIcons();
+    }, 1200);
+    return;
+  }
 
   try {
     const client = getGenLayerClient(currentAccount);
