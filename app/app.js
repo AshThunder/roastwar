@@ -299,7 +299,7 @@ async function connectWallet() {
               chainName: "GenLayer StudioNet",
               rpcUrls: ["https://studio.genlayer.com/api"],
               nativeCurrency: { name: "GEN", symbol: "GEN", decimals: 18 },
-              blockExplorerUrls: ["https://genlayer-explorer.vercel.app"]
+              blockExplorerUrls: ["https://explorer-studio.genlayer.com"]
             }],
           });
         } catch (addErr) {
