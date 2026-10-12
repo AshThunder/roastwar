@@ -1,0 +1,69 @@
+{
+  "total_duration": 120.5,
+  "cues": [
+    {
+      "idx": 0,
+      "file": "assets/vo_parts/cue_0.mp3",
+      "dur": 16.8,
+      "text": "Traditional smart contracts can calculate balances, but they cannot judge wit. Welcome to RoastWars, the world's first autonomous comedy arena powered by GenLayer.",
+      "start": 0.8,
+      "end": 17.6
+    },
+    {
+      "idx": 1,
+      "file": "assets/vo_parts/cue_1.mp3",
+      "dur": 13.344,
+      "text": "By running LLMs directly inside validator consensus, RoastWars brings subjective intelligence and comedic judgment fully on-chain.",
+      "start": 19.0,
+      "end": 32.34
+    },
+    {
+      "idx": 2,
+      "file": "assets/vo_parts/cue_2.mp3",
+      "dur": 12.528,
+      "text": "In the arena lobby, contenders create or match one on one duels, staking native GEN tokens in a zero-gas escrow pot.",
+      "start": 33.74,
+      "end": 46.27
+    },
+    {
+      "idx": 3,
+      "file": "assets/vo_parts/cue_3.mp3",
+      "dur": 10.44,
+      "text": "Whether trading vicious burns or wholesome compliments, both punchlines are securely locked into the contract.",
+      "start": 47.67,
+      "end": 58.11
+    },
+    {
+      "idx": 4,
+      "file": "assets/vo_parts/cue_4.mp3",
+      "dur": 13.728,
+      "text": "When a duel closes, five independent validator nodes deliberate, scoring each line from zero to ten based on comedic timing and delivery.",
+      "start": 59.51,
+      "end": 73.24
+    },
+    {
+      "idx": 5,
+      "file": "assets/vo_parts/cue_5.mp3",
+      "dur": 13.104,
+      "text": "In this example battle, Alice scores nine out of ten to claim victory, instantly unlocking the double prize pot directly to her wallet.",
+      "start": 74.64,
+      "end": 87.74
+    },
+    {
+      "idx": 6,
+      "file": "assets/vo_parts/cue_6.mp3",
+      "dur": 16.368,
+      "text": "Every punchline, score, and payout is recorded immutably on-chain. Contenders climb the Hall of Fame to claim supremacy as the sharpest comedian on Web3.",
+      "start": 89.14,
+      "end": 105.51
+    },
+    {
+      "idx": 7,
+      "file": "assets/vo_parts/cue_7.mp3",
+      "dur": 10.8,
+      "text": "Experience the future of intelligent contracts today. Connect and battle live at roastwar dot vercel dot app.",
+      "start": 106.91,
+      "end": 117.71
+    }
+  ]
+}
