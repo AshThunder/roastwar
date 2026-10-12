@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoastWars — Motion Design Project Showcase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700;800&family=Space+Grotesk:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    :root {
+      --slide-duration: 9s;
+    }
+    body {
+      background: #0F172A;
+      color: #F8FAFC;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: var(--font-body);
+      user-select: none;
+    }
+    .motion-viewport {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-sizing: border-box;
+      background: radial-gradient(circle at 50% 20%, rgba(234, 88, 12, 0.15) 0%, rgba(15, 23, 42, 1) 75%);
+    }
+
+    /* Motion Header */
+    .motion-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 2.5rem;
+      border-bottom: 3px solid #334155;
+      background: rgba(15, 23, 42, 0.95);
+      z-index: 100;
+    }
+    .motion-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .motion-brand .logo-title {
+      color: #FFFFFF;
+      font-size: 1.5rem;
+      letter-spacing: -0.04em;
+    }
+    .motion-brand .highlight {
+      color: var(--primary);
+    }
+    .motion-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #1E293B;
+      border: 2px solid #475569;
+      padding: 0.35rem 0.85rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #38BDF8;
+      box-shadow: 2px 2px 0px #000;
+    }
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #EF4444;
+      animation: pulse-dot 1s infinite alternate;
+    }
+    @keyframes pulse-dot {
+      from { opacity: 0.4; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1.15); }
+    }
+
+    /* Scene Stage */
+    .motion-stage {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 3rem;
+      overflow: hidden;
+    }
+    .scene {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(30px) scale(0.98);
+      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      padding: 2rem 4rem;
+      box-sizing: border-box;
+    }
+    .scene.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0px) scale(1);
+    }
+
+    /* SCENE 1: HERO TITLE CARD */
+    .hero-motion-card {
+      background: #FFFDF8;
+      color: var(--text);
+      border: 4px solid #1E293B;
+      box-shadow: 12px 12px 0px #EA580C;
+      padding: 3rem 4rem;
+      max-width: 960px;
+      text-align: center;
+      animation: card-float 4s ease-in-out infinite alternate;
+    }
+    @keyframes card-float {
+      from { transform: translateY(0px); }
+      to { transform: translateY(-8px); }
+    }
+    .scene-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #FFF7ED;
+      border: 2px solid var(--primary);
+      padding: 0.35rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+    .motion-headline {
+      font-family: var(--font-headline);
+      font-size: 3.5rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+      margin-bottom: 1.25rem;
+      color: var(--text);
+    }
+    .motion-headline span.orange {
+      color: var(--primary);
+      text-decoration: underline;
+      text-underline-offset: 6px;
+    }
+    .motion-subtext {
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      max-width: 760px;
+      margin: 0 auto 2rem;
+      line-height: 1.5;
+    }
+    .motion-chips-row {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .chip {
+      background: #F1F5F9;
+      border: 2px solid var(--border);
+      padding: 0.5rem 1rem;
+      font-family: var(--font-headline);
+      font-size: 0.85rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 3px 3px 0px var(--border);
+    }
+
+    /* SCENE 2: PARADIGM SHIFT */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5rem;
+      max-width: 1100px;
+      width: 100%;
+    }
+    .compare-card {
+      background: #1E293B;
+      border: 4px solid #334155;
+      padding: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      box-shadow: 8px 8px 0px #000;
+    }
+    .compare-card.genlayer-card {
+      background: #FFFDF8;
+      color: var(--text);
+      border-color: var(--primary);
+      box-shadow: 10px 10px 0px var(--primary);
+    }
+    .compare-title {
+      font-family: var(--font-headline);
+      font-size: 1.6rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .compare-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      font-size: 1.05rem;
+      line-height: 1.45;
+    }
+    .compare-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    /* SCENE 3: 4-STEP LOOP */
+    .loop-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      max-width: 1200px;
+      width: 100%;
+    }
+    .loop-card {
+      background: #FFFDF8;
+      color: var(--text);
+      border: 3px solid var(--border);
+      box-shadow: 6px 6px 0px var(--primary);
+      padding: 1.75rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 1rem;
+    }
+    .loop-num {
+      width: 44px;
+      height: 44px;
+      background: var(--primary);
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-headline);
+      font-weight: 900;
+      font-size: 1.25rem;
+      border: 2px solid var(--border);
+      box-shadow: 3px 3px 0px var(--border);
+    }
+    .loop-card h4 {
+      margin: 0;
+      font-family: var(--font-headline);
+      font-size: 1.2rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+    .loop-card p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* SCENE 4: LIVE DELIBERATION */
+    .battle-motion-card {
+      background: #FFFDF8;
+      color: var(--text);
+      border: 4px solid var(--border);
+      box-shadow: 10px 10px 0px var(--accent-gold);
+      padding: 2.25rem;
+      max-width: 1000px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .faceoff-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    .contender-motion-box {
+      background: #F8FAFC;
+      border: 3px solid var(--border);
+      padding: 1.25rem;
+      box-shadow: 4px 4px 0px var(--border);
+    }
+    .contender-motion-box.winner-glow {
+      border-color: var(--accent-gold);
+      background: #FEF3C7;
+      box-shadow: 6px 6px 0px var(--accent-gold);
+    }
+    .live-meter-bar {
+      height: 12px;
+      background: #E2E8F0;
+      border: 1px solid var(--border);
+      margin-top: 0.75rem;
+      overflow: hidden;
+    }
+    .live-meter-fill {
+      height: 100%;
+      background: var(--primary);
+      transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .live-meter-fill.winner-fill {
+      background: var(--accent-gold);
+    }
+
+    /* SCENE 5: VERIFIED OUTRO */
+    .outro-card {
+      background: #FFFDF8;
+      color: var(--text);
+      border: 4px solid var(--border);
+      box-shadow: 12px 12px 0px var(--accent-green);
+      padding: 3rem 4rem;
+      max-width: 900px;
+      width: 100%;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .verified-table {
+      width: 100%;
+      border: 2px solid var(--border);
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      margin: 1rem 0;
+      text-align: left;
+    }
+    .verified-table td {
+      padding: 0.6rem 1rem;
+      border: 1px solid var(--border);
+    }
+    .verified-table td:first-child {
+      font-weight: 800;
+      background: #F8FAFC;
+      width: 35%;
+    }
+
+    /* Progress & Playback Controls Bar */
+    .motion-footer {
+      background: #0B1120;
+      border-top: 3px solid #334155;
+      padding: 1rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      z-index: 100;
+    }
+    .timeline-container {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .timeline-step {
+      flex: 1;
+      height: 6px;
+      background: #334155;
+      border-radius: 3px;
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+    }
+    .timeline-step-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--primary);
+      transition: width 0.1s linear;
+    }
+    .timeline-step.completed .timeline-step-fill {
+      width: 100%;
+      background: var(--accent-green);
+    }
+    .timeline-step.active .timeline-step-fill {
+      background: var(--primary);
+    }
+    .controls-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: #94A3B8;
+    }
+    .scene-nav-btns {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .nav-pill {
+      background: #1E293B;
+      color: #F8FAFC;
+      border: 2px solid #475569;
+      padding: 0.35rem 0.75rem;
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-size: 0.75rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .nav-pill:hover, .nav-pill.active {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+  <!-- Neo-Brutalist Scanline & Grid Overlays -->
+  <div class="grid-pattern-bg" style="opacity: 0.15;"></div>
+  <div class="scanline-bg" style="opacity: 0.1;"></div>
+
+  <div class="motion-viewport">
+    <!-- Motion Top Bar -->
+    <header class="motion-header">
+      <div class="motion-brand">
+        <div class="logo-emblem" style="background:#FFF7ED;"><i data-lucide="flame"></i></div>
+        <span class="logo-title">ROAST<span class="highlight">WARS</span></span>
+      </div>
+
+      <div style="display: flex; gap: 1rem; align-items: center;">
+        <div class="motion-badge">
+          <span class="live-dot"></span>
+          <span>AUTONOMOUS AI ARENA</span>
+        </div>
+        <div class="motion-badge">
+          <i data-lucide="cpu"></i>
+          <span>GENLAYER STUDIONET</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Stage Scenes -->
+    <main class="motion-stage">
+
+      <!-- SCENE 1: THE REVEAL -->
+      <div class="scene active" id="scene1">
+        <div class="hero-motion-card">
+          <div class="scene-tag">
+            <i data-lucide="sparkles"></i> Project Overview & Vision
+          </div>
+          <h1 class="motion-headline">
+            Where Punchlines Meet <span class="orange">Consensus</span>
+          </h1>
+          <p class="motion-subtext">
+            The world's first autonomous on-chain comedy club. Contenders wager GEN tokens in 1-on-1 battles of wit, judged by decentralized multi-validator LLM consensus.
+          </p>
+          <div class="motion-chips-row">
+            <div class="chip"><i data-lucide="bot"></i> Multi-Validator AI Consensus</div>
+            <div class="chip"><i data-lucide="coins"></i> 2X Winner Prize Pots</div>
+            <div class="chip"><i data-lucide="zap"></i> Zero Gas Internal Escrow</div>
+            <div class="chip"><i data-lucide="shield-check"></i> 100% StudioNet Verified</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCENE 2: THE PROBLEM VS GENLAYER -->
+      <div class="scene" id="scene2">
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+          <div class="scene-tag"><i data-lucide="brain"></i> The Architectural Breakthrough</div>
+          <h2 style="font-family: var(--font-headline); font-size: 2.2rem; font-weight: 900; text-transform: uppercase; margin: 0; color: #FFF;">
+            Why Traditional Blockchains Couldn't Do This
+          </h2>
+        </div>
+        <div class="compare-grid">
+          <!-- Traditional Blockchains -->
+          <div class="compare-card">
+            <div class="compare-title" style="color: #EF4444;">
+              <i data-lucide="x-circle"></i> Standard Smart Contracts
+            </div>
+            <div class="compare-list">
+              <div class="compare-item">
+                <i data-lucide="minus"></i>
+                <span>Strictly limited to deterministic math (2 + 2 = 4, balances, hashes).</span>
+              </div>
+              <div class="compare-item">
+                <i data-lucide="minus"></i>
+                <span>Cannot understand natural language, comedy, satire, or wordplay.</span>
+              </div>
+              <div class="compare-item">
+                <i data-lucide="minus"></i>
+                <span>Centralized oracles would introduce single-point-of-failure censorship.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- GenLayer Intelligent Contracts -->
+          <div class="compare-card genlayer-card">
+            <div class="compare-title" style="color: var(--primary);">
+              <i data-lucide="check-circle-2"></i> GenLayer Intelligent Contracts
+            </div>
+            <div class="compare-list">
+              <div class="compare-item">
+                <i data-lucide="check"></i>
+                <span>Runs LLM prompts directly inside validator consensus (<code>gl.vm.run_nondet_unsafe</code>).</span>
+              </div>
+              <div class="compare-item">
+                <i data-lucide="check"></i>
+                <span>Leader validator prompts an LLM with comedic rubrics; validator nodes independently agree.</span>
+              </div>
+              <div class="compare-item">
+                <i data-lucide="check"></i>
+                <span>Scores punchlines 0–10, generates hilarious critiques, and awards 2x pots autonomously.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCENE 3: THE BATTLE LOOP -->
+      <div class="scene" id="scene3">
+        <div style="text-align: center; margin-bottom: 2rem;">
+          <div class="scene-tag"><i data-lucide="swords"></i> Core Game Mechanics</div>
+          <h2 style="font-family: var(--font-headline); font-size: 2.2rem; font-weight: 900; text-transform: uppercase; margin: 0; color: #FFF;">
+            How A Roast Duel Works In 4 Steps
+          </h2>
+        </div>
+        <div class="loop-grid">
+          <div class="loop-card">
+            <div class="loop-num">1</div>
+            <h4>Ignite Duel</h4>
+            <p>Creator sets a topic, format (Roast or Compliment), drops the opening burn, and locks GEN stake.</p>
+          </div>
+          <div class="loop-card">
+            <div class="loop-num">2</div>
+            <h4>Accept Challenge</h4>
+            <p>A rival challenger matches the required wager in GEN and submits their comeback line.</p>
+          </div>
+          <div class="loop-card">
+            <div class="loop-num">3</div>
+            <h4>AI Jury Deliberation</h4>
+            <p>5 independent GenLayer validator nodes evaluate humor, sharpness, and score both lines 0–10.</p>
+          </div>
+          <div class="loop-card">
+            <div class="loop-num">4</div>
+            <h4>Consensus Crown</h4>
+            <p>The contract crowns the victor on-chain and transfers the entire 2x pot via internal escrow.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCENE 4: LIVE DELIBERATION SHOWCASE -->
+      <div class="scene" id="scene4">
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+          <div class="scene-tag"><i data-lucide="scale"></i> Live Consensus Simulation</div>
+          <h2 style="font-family: var(--font-headline); font-size: 2.2rem; font-weight: 900; text-transform: uppercase; margin: 0; color: #FFF;">
+            AI Jury Chamber: Battle #1
+          </h2>
+        </div>
+
+        <div class="battle-motion-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 0.75rem;">
+            <span style="font-family: var(--font-headline); font-weight: 900; font-size: 1.25rem;">
+              TOPIC: "AI CODING ASSISTANTS"
+            </span>
+            <div style="display: flex; gap: 0.5rem;">
+              <span class="badge badge-roast"><i data-lucide="flame"></i> ROAST BATTLE</span>
+              <span class="badge" style="background:#FEF3C7; color:#92400E; font-family:var(--font-mono); font-weight:800;">
+                <i data-lucide="trophy"></i> POT: 2.00 GEN
+              </span>
+            </div>
+          </div>
+
+          <!-- Contenders faceoff -->
+          <div class="faceoff-row">
+            <div class="contender-motion-box">
+              <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 0.85rem;">
+                <span><i data-lucide="user"></i> Deployer Host</span>
+                <span id="score1Val" style="font-family: var(--font-mono); color: var(--primary);">7/10</span>
+              </div>
+              <p style="font-style: italic; font-size: 0.95rem; margin: 0.5rem 0 0; color: var(--text);">
+                "You generate 500 lines of code just to center a div, and half of them are deprecated hallucinations."
+              </p>
+              <div class="live-meter-bar">
+                <div class="live-meter-fill" id="meter1" style="width: 70%;"></div>
+              </div>
+            </div>
+
+            <div class="contender-motion-box winner-glow">
+              <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 0.85rem;">
+                <span style="color: #92400E;"><i data-lucide="crown"></i> Alice The Savage (VICTOR)</span>
+                <span id="score2Val" style="font-family: var(--font-mono); color: var(--accent-gold); font-size: 1rem;">9/10</span>
+              </div>
+              <p style="font-style: italic; font-size: 0.95rem; margin: 0.5rem 0 0; color: #1E293B;">
+                "At least my code actually runs; your git commit history looks like an EEG of someone flatlining during a stack overflow."
+              </p>
+              <div class="live-meter-bar">
+                <div class="live-meter-fill winner-fill" id="meter2" style="width: 90%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Consensus Banner -->
+          <div style="background: #BBF7D0; border: 2px solid #16A34A; padding: 0.85rem 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <div class="winner-crown" style="font-size: 1.5rem; color: #15803D;"><i data-lucide="crown"></i></div>
+              <div>
+                <strong style="color: #14532D; font-family: var(--font-headline); text-transform: uppercase;">VERDICT: Alice The Savage Crowned Winner!</strong>
+                <div style="font-size: 0.8rem; color: #166534;">2.00 GEN prize pot automatically paid out via internal escrow.</div>
+              </div>
+            </div>
+            <span class="badge" style="background:#15803D; color:#FFF; font-weight:800;">5/5 CONSENSUS</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCENE 5: VERIFIED ON STUDIONET -->
+      <div class="scene" id="scene5">
+        <div class="outro-card">
+          <div class="scene-tag" style="background: #DCFCE7; border-color: #16A34A; color: #15803D;">
+            <i data-lucide="check-check"></i> Live On-Chain Deployment
+          </div>
+          <h2 style="font-family: var(--font-headline); font-size: 2.75rem; font-weight: 900; text-transform: uppercase; margin: 0;">
+            Verified on GenLayer StudioNet
+          </h2>
+          <table class="verified-table">
+            <tr>
+              <td>Network</td>
+              <td>GenLayer StudioNet (Chain ID 61999)</td>
+            </tr>
+            <tr>
+              <td>Contract Address</td>
+              <td style="color: var(--primary); font-weight: 700;">0xc3b21E949187120CdBd8f273F5d6b3d9963772eB</td>
+            </tr>
+            <tr>
+              <td>Consensus Protocol</td>
+              <td>Multi-Validator Equivalence (gl.vm.run_nondet_unsafe)</td>
+            </tr>
+            <tr>
+              <td>Testing & Verification</td>
+              <td>8/8 Passing In-Memory Tests • GenVM Linter Validated</td>
+            </tr>
+            <tr>
+              <td>GitHub Repository</td>
+              <td>github.com/AshThunder/roastwar (Vercel Ready)</td>
+            </tr>
+          </table>
+          <div style="display: flex; gap: 1rem;">
+            <div class="chip" style="background: var(--primary); color: #FFF; border-color: var(--border);">
+              <i data-lucide="flame"></i> Play on StudioNet
+            </div>
+            <div class="chip" style="background: #1E293B; color: #FFF; border-color: var(--border);">
+              <i data-lucide="github"></i> Open Source on GitHub
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Bottom Motion Controls & Timeline Progress -->
+    <footer class="motion-footer">
+      <div class="timeline-container">
+        <div class="timeline-step active" id="timeStep0" onclick="goToScene(0)">
+          <div class="timeline-step-fill" id="fill0"></div>
+        </div>
+        <div class="timeline-step" id="timeStep1" onclick="goToScene(1)">
+          <div class="timeline-step-fill" id="fill1"></div>
+        </div>
+        <div class="timeline-step" id="timeStep2" onclick="goToScene(2)">
+          <div class="timeline-step-fill" id="fill2"></div>
+        </div>
+        <div class="timeline-step" id="timeStep3" onclick="goToScene(3)">
+          <div class="timeline-step-fill" id="fill3"></div>
+        </div>
+        <div class="timeline-step" id="timeStep4" onclick="goToScene(4)">
+          <div class="timeline-step-fill" id="fill4"></div>
+        </div>
+      </div>
+
+      <div class="controls-row">
+        <div>
+          <span id="sceneTitle">SCENE 1/5: ROASTWARS VISION</span>
+        </div>
+
+        <div class="scene-nav-btns">
+          <button class="nav-pill" onclick="prevScene()"><i data-lucide="chevron-left"></i> PREV</button>
+          <button class="nav-pill" id="btnPlayPause" onclick="togglePlay()"><i data-lucide="pause"></i> PAUSE</button>
+          <button class="nav-pill" onclick="nextScene()">NEXT <i data-lucide="chevron-right"></i></button>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="lucide.min.js"></script>
+  <script>
+    lucide.createIcons();
+
+    const scenes = [
+      { id: "scene1", title: "SCENE 1/5: ROASTWARS VISION", duration: 8000 },
+      { id: "scene2", title: "SCENE 2/5: THE BREAKTHROUGH (LLM IN CONSENSUS)", duration: 8000 },
+      { id: "scene3", title: "SCENE 3/5: THE 4-STEP BATTLE LOOP", duration: 8000 },
+      { id: "scene4", title: "SCENE 4/5: LIVE JURY DELIBERATION SHOWCASE", duration: 9000 },
+      { id: "scene5", title: "SCENE 5/5: VERIFIED ON GENLAYER STUDIONET", duration: 8000 }
+    ];
+
+    let currentSceneIdx = 0;
+    let isPlaying = true;
+    let sceneStartTime = Date.now();
+    let animFrame = null;
+
+    function updateSceneDisplay() {
+      scenes.forEach((s, idx) => {
+        const el = document.getElementById(s.id);
+        const step = document.getElementById(`timeStep${idx}`);
+        const fill = document.getElementById(`fill${idx}`);
+
+        if (idx === currentSceneIdx) {
+          el.classList.add("active");
+          step.className = "timeline-step active";
+        } else if (idx < currentSceneIdx) {
+          el.classList.remove("active");
+          step.className = "timeline-step completed";
+          fill.style.width = "100%";
+        } else {
+          el.classList.remove("active");
+          step.className = "timeline-step";
+          fill.style.width = "0%";
+        }
+      });
+
+      document.getElementById("sceneTitle").textContent = scenes[currentSceneIdx].title;
+      sceneStartTime = Date.now();
+      lucide.createIcons();
+    }
+
+    function tick() {
+      if (isPlaying) {
+        const duration = scenes[currentSceneIdx].duration;
+        const elapsed = Date.now() - sceneStartTime;
+        const progress = Math.min((elapsed / duration) * 100, 100);
+
+        const currentFill = document.getElementById(`fill${currentSceneIdx}`);
+        if (currentFill) {
+          currentFill.style.width = `${progress}%`;
+        }
+
+        if (elapsed >= duration) {
+          currentSceneIdx = (currentSceneIdx + 1) % scenes.length;
+          updateSceneDisplay();
+        }
+      }
+      animFrame = requestAnimationFrame(tick);
+    }
+
+    function goToScene(idx) {
+      currentSceneIdx = idx;
+      updateSceneDisplay();
+    }
+
+    function nextScene() {
+      currentSceneIdx = (currentSceneIdx + 1) % scenes.length;
+      updateSceneDisplay();
+    }
+
+    function prevScene() {
+      currentSceneIdx = (currentSceneIdx - 1 + scenes.length) % scenes.length;
+      updateSceneDisplay();
+    }
+
+    function togglePlay() {
+      isPlaying = !isPlaying;
+      const btn = document.getElementById("btnPlayPause");
+      if (isPlaying) {
+        btn.innerHTML = '<i data-lucide="pause"></i> PAUSE';
+        sceneStartTime = Date.now();
+      } else {
+        btn.innerHTML = '<i data-lucide="play"></i> PLAY';
+      }
+      lucide.createIcons();
+    }
+
+    // Start auto loop
+    updateSceneDisplay();
+    animFrame = requestAnimationFrame(tick);
+  </script>
+</body>
+</html>
