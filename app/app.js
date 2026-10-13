@@ -20,6 +20,7 @@ const KNOWN_PLAYERS = {
 
 let currentAccount = null;
 let connectedWallet = null;
+let userClaimableBalance = 0;
 
 // Live On-Chain Duels Store (Populated exclusively from GenLayer Contract)
 let duels = [];
@@ -195,6 +196,7 @@ async function fetchOnChainData(showToastNotification = false) {
 
     // 4. Update balances of active accounts
     await updateAccountBalances(client);
+    await fetchUserClaimableBalance();
 
     renderDuels();
     renderLeaderboard();
@@ -248,6 +250,7 @@ async function connectWallet() {
     if (addrText) addrText.textContent = formatAddr(demoAddress);
     if (balBadge) balBadge.textContent = "50.00 GEN";
 
+    await fetchUserClaimableBalance();
     showToast(`Connected Demo Player: ${formatAddr(demoAddress)} (50.00 GEN)`, "success");
     return;
   }
@@ -333,6 +336,7 @@ async function connectWallet() {
     if (balBadge) balBadge.textContent = balanceStr;
 
     await updateAccountBalances(getGenLayerClient());
+    await fetchUserClaimableBalance();
     showToast(`Connected: ${formatAddr(userAddress)} (${balanceStr})`, "success");
   } catch (err) {
     console.error("Wallet connection failed:", err);
@@ -345,13 +349,145 @@ async function connectWallet() {
 function disconnectWallet() {
   connectedWallet = null;
   currentAccount = null;
+  userClaimableBalance = 0;
 
   const btnConnect = document.getElementById("btnConnectWallet");
   const pill = document.getElementById("connectedWalletPill");
   if (btnConnect) btnConnect.style.display = "inline-flex";
   if (pill) pill.style.display = "none";
 
+  const displayEl = document.getElementById("userClaimableBalanceText");
+  if (displayEl) displayEl.textContent = "0.00 GEN";
+  const btnWithdraw = document.getElementById("btnWithdrawVault");
+  if (btnWithdraw) btnWithdraw.disabled = true;
+
   showToast("Wallet disconnected.", "info");
+}
+
+// ── Claimable Escrow Balance & Withdrawal Operations ──
+async function fetchUserClaimableBalance() {
+  const displayEl = document.getElementById("userClaimableBalanceText");
+  const btnWithdraw = document.getElementById("btnWithdrawVault");
+  
+  if (!currentAccount || !currentAccount.address) {
+    userClaimableBalance = 0;
+    if (displayEl) displayEl.textContent = "0.00 GEN";
+    if (btnWithdraw) btnWithdraw.disabled = true;
+    return;
+  }
+
+  if (currentAccount.isDemo) {
+    if (displayEl) displayEl.textContent = `${userClaimableBalance.toFixed(2)} GEN`;
+    if (btnWithdraw) btnWithdraw.disabled = userClaimableBalance <= 0;
+    return;
+  }
+
+  try {
+    const client = getGenLayerClient();
+    const balRaw = await client.readContract({
+      address: CONTRACT_CONFIG.address,
+      functionName: "get_balance",
+      args: [currentAccount.address]
+    });
+    const balNum = Number(balRaw) / 1e18;
+    userClaimableBalance = balNum;
+    if (displayEl) displayEl.textContent = `${balNum.toFixed(2)} GEN`;
+    if (btnWithdraw) btnWithdraw.disabled = balNum <= 0;
+  } catch (err) {
+    console.warn("Failed to fetch claimable balance:", err);
+  }
+}
+
+async function withdrawWinningsAction() {
+  const btnWithdraw = document.getElementById("btnWithdrawVault");
+  if (!currentAccount) {
+    showToast("Please connect your wallet first.", "warning");
+    return;
+  }
+
+  if (userClaimableBalance <= 0) {
+    showToast("No credited balance available to withdraw.", "info");
+    return;
+  }
+
+  const withdrawAmount = userClaimableBalance;
+
+  if (currentAccount.isDemo) {
+    userClaimableBalance = 0;
+    showToast(`Successfully withdrew ${withdrawAmount.toFixed(2)} GEN to your wallet!`, "success");
+    await fetchUserClaimableBalance();
+    return;
+  }
+
+  if (btnWithdraw) {
+    btnWithdraw.disabled = true;
+    btnWithdraw.innerHTML = `<span class="btn-icon"><i data-lucide="loader-2" class="spin"></i></span><span>Withdrawing...</span>`;
+    refreshIcons();
+  }
+
+  try {
+    showToast("Submitting on-chain withdrawal...", "info");
+    const client = getGenLayerClient(currentAccount);
+    const hash = await client.writeContract({
+      address: CONTRACT_CONFIG.address,
+      functionName: "withdraw_balance",
+      args: []
+    });
+
+    await pollTransaction(client, hash, "Withdrawing credited balance on StudioNet...");
+    showToast(`Successfully withdrew ${withdrawAmount.toFixed(2)} GEN from contract escrow!`, "success");
+    await fetchUserClaimableBalance();
+    await updateWalletBalance();
+  } catch (err) {
+    console.error("Withdraw Error:", err);
+    showToast("Withdrawal failed: " + (err.message || err), "error");
+  } finally {
+    if (btnWithdraw) {
+      btnWithdraw.innerHTML = `<span class="btn-icon"><i data-lucide="arrow-down-to-line"></i></span><span>Withdraw GEN</span>`;
+      refreshIcons();
+    }
+  }
+}
+
+async function cancelDuelAction(duelId) {
+  const duel = duels.find(d => d.id === duelId);
+  if (!duel) return;
+
+  if (duel.status !== "OPEN") {
+    showToast(`Cannot cancel duel in status '${duel.status}'.`, "warning");
+    return;
+  }
+
+  if (!confirm(`Are you sure you want to cancel Battle #${duelId} ("${duel.topic}") and recover your stake of ${duel.stake.toFixed(2)} GEN?`)) {
+    return;
+  }
+
+  if (currentAccount && currentAccount.isDemo) {
+    duel.status = "CANCELLED";
+    userClaimableBalance += duel.stake;
+    showToast(`Battle #${duelId} cancelled! Stake of ${duel.stake.toFixed(2)} GEN credited to your claimable balance.`, "success");
+    renderDuels();
+    await fetchUserClaimableBalance();
+    return;
+  }
+
+  try {
+    showToast("Cancelling duel on StudioNet...", "info");
+    const client = getGenLayerClient(currentAccount);
+    const hash = await client.writeContract({
+      address: CONTRACT_CONFIG.address,
+      functionName: "cancel_duel",
+      args: [duelId]
+    });
+
+    await pollTransaction(client, hash, "Cancelling duel and crediting refund...");
+    showToast(`Duel #${duelId} cancelled! Stake credited to claimable balance.`, "success");
+    await fetchOnChainData();
+    await fetchUserClaimableBalance();
+  } catch (err) {
+    console.error("Cancel Duel Error:", err);
+    showToast("Failed to cancel duel: " + (err.message || err), "error");
+  }
 }
 
 // Update Top Stats & Tab Badges
@@ -407,11 +543,25 @@ function renderDuels() {
 
     let actionBtn = "";
     if (isOpen) {
-      actionBtn = `<button class="btn btn-primary" onclick="openAcceptModal(${duel.id})"><span class="btn-icon"><i data-lucide="swords"></i></span><span>Accept Challenge (${duel.stake} GEN)</span></button>`;
+      const isCreator = currentAccount && duel.creator && (currentAccount.address.toLowerCase() === duel.creator.toLowerCase());
+      actionBtn = `
+        <div style="display:flex; gap:8px; width:100%;">
+          ${!isCreator ? `<button class="btn btn-primary" style="flex:1;" onclick="openAcceptModal(${duel.id})"><span class="btn-icon"><i data-lucide="swords"></i></span><span>Accept Challenge (${duel.stake.toFixed(2)} GEN)</span></button>` : ''}
+          <button class="btn btn-outline-danger" style="${isCreator ? 'width:100%;' : ''}" onclick="cancelDuelAction(${duel.id})" title="Cancel duel and recover stake">
+            <span class="btn-icon"><i data-lucide="x-circle"></i></span><span>Cancel Duel</span>
+          </button>
+        </div>
+      `;
     } else if (isAccepted) {
       actionBtn = `<button class="btn btn-primary" onclick="openJuryModal(${duel.id})"><span class="btn-icon"><i data-lucide="scale"></i></span><span>Summon AI Jury Consensus</span></button>`;
     } else if (isResolved) {
       actionBtn = `<button class="btn btn-secondary" onclick="openJuryModal(${duel.id})"><span class="btn-icon"><i data-lucide="trophy"></i></span><span>View Jury Deliberation & Scores</span></button>`;
+    } else if (duel.status === "CANCELLED") {
+      actionBtn = `
+        <div class="cancelled-status-note">
+          <span><i data-lucide="alert-circle"></i> Duel Cancelled • Stake refunded to creator's claimable balance</span>
+        </div>
+      `;
     }
 
     return `
@@ -700,6 +850,12 @@ async function executeJudgeDuel(duelId) {
         btnJudge.disabled = false;
         btnJudge.innerHTML = `<span class="btn-icon"><i data-lucide="scale"></i></span><span>Summon AI Jury Consensus</span>`;
         refreshIcons();
+        if (duel.winner && currentAccount && duel.winner.toLowerCase() === currentAccount.address.toLowerCase()) {
+          userClaimableBalance += duel.stake * 2;
+        } else if (duel.winning_side === "TIE") {
+          userClaimableBalance += duel.stake;
+        }
+        fetchUserClaimableBalance();
         openJuryModal(duelId);
       }, 1200);
     }, 1500);

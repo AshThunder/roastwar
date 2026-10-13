@@ -166,3 +166,119 @@ def test_judge_duel_compliment_mode(direct_vm, direct_deploy, direct_alice, dire
     assert duel["winner"].lower() == to_addr(direct_bob).lower()
     assert duel["winning_side"] == "OPPONENT"
     assert duel["opponent_score"] == 10
+
+
+def test_winner_credits_withdraw_no_replay(direct_vm, direct_deploy, direct_alice, direct_bob):
+    """Winner can withdraw credited pot, and subsequent withdraw reverts (no replay)."""
+    contract = direct_deploy("contracts/roast_wars.py")
+
+    direct_vm.sender = direct_alice
+    direct_vm.value = 2 * 10**18
+    contract.create_duel("Solana", "ROAST", "Rebooting the network is their favorite consensus algorithm.")
+
+    direct_vm.sender = direct_bob
+    direct_vm.value = 2 * 10**18
+    contract.accept_duel(1, "At least it reboots faster than Ethereum confirms a sandwich attack.")
+
+    mock_verdict = json.dumps({
+        "winner": "CREATOR",
+        "creator_score": 9,
+        "opponent_score": 6,
+        "critique": "Creator punchline was devastating and technically precise.",
+        "mvp_quote": "Rebooting the network is their favorite consensus algorithm"
+    })
+    direct_vm.mock_llm(r".*Grand AI Comedy Jury.*", mock_verdict)
+    contract.judge_duel(1)
+
+    # Alice won the 4 GEN pot (credited to internal balance)
+    assert contract.get_balance(to_addr(direct_alice)) == 4 * 10**18
+    assert contract.get_balance(to_addr(direct_bob)) == 0
+
+    # Alice withdraws her winnings
+    direct_vm.sender = direct_alice
+    contract.withdraw_balance()
+
+    # Balance is consumed to 0
+    assert contract.get_balance(to_addr(direct_alice)) == 0
+
+    # Second withdrawal attempt reverts (preventing replay)
+    with direct_vm.expect_revert("No balance to withdraw"):
+        contract.withdraw_balance()
+
+
+def test_tie_credits_withdraw_no_replay(direct_vm, direct_deploy, direct_alice, direct_bob):
+    """Both contenders receive refunds on a tie, can withdraw once, and replay is blocked."""
+    contract = direct_deploy("contracts/roast_wars.py")
+
+    direct_vm.sender = direct_alice
+    direct_vm.value = 15 * 10**17  # 1.5 GEN
+    contract.create_duel("Rust", "ROAST", "The borrow checker rejected my marriage proposal.")
+
+    direct_vm.sender = direct_bob
+    direct_vm.value = 15 * 10**17  # 1.5 GEN
+    contract.accept_duel(1, "The compiler threw a lifetime error when I said till death do us part.")
+
+    mock_verdict = json.dumps({
+        "winner": "TIE",
+        "creator_score": 8,
+        "opponent_score": 8,
+        "critique": "Both contenders delivered equally magnificent borrow checker punchlines.",
+        "mvp_quote": "lifetime error when I said till death do us part"
+    })
+    direct_vm.mock_llm(r".*Grand AI Comedy Jury.*", mock_verdict)
+    contract.judge_duel(1)
+
+    # Both players credited with their refunded stakes
+    assert contract.get_balance(to_addr(direct_alice)) == 15 * 10**17
+    assert contract.get_balance(to_addr(direct_bob)) == 15 * 10**17
+
+    # Alice withdraws her refund
+    direct_vm.sender = direct_alice
+    contract.withdraw_balance()
+    assert contract.get_balance(to_addr(direct_alice)) == 0
+
+    # Alice replay attempt reverts
+    with direct_vm.expect_revert("No balance to withdraw"):
+        contract.withdraw_balance()
+
+    # Bob withdraws his refund
+    direct_vm.sender = direct_bob
+    contract.withdraw_balance()
+    assert contract.get_balance(to_addr(direct_bob)) == 0
+
+    # Bob replay attempt reverts
+    with direct_vm.expect_revert("No balance to withdraw"):
+        contract.withdraw_balance()
+
+
+def test_cancellation_credits_withdraw_no_replay(direct_vm, direct_deploy, direct_alice):
+    """Creator recovers stake upon cancellation, cancellation cannot be repeated, and withdraw cannot replay."""
+    contract = direct_deploy("contracts/roast_wars.py")
+
+    direct_vm.sender = direct_alice
+    direct_vm.value = 3 * 10**18
+    contract.create_duel("Crypto Influencers", "ROAST", "Your technical analysis is just astrology for finance bros.")
+
+    # Duel is OPEN
+    assert contract.get_duel(1)["status"] == "OPEN"
+    assert contract.get_balance(to_addr(direct_alice)) == 0
+
+    # Alice cancels the duel
+    direct_vm.sender = direct_alice
+    contract.cancel_duel(1)
+
+    assert contract.get_duel(1)["status"] == "CANCELLED"
+    assert contract.get_balance(to_addr(direct_alice)) == 3 * 10**18
+
+    # Cancellation cannot be replayed on an already cancelled duel
+    with direct_vm.expect_revert("Cannot cancel duel in status 'CANCELLED'"):
+        contract.cancel_duel(1)
+
+    # Alice withdraws her refunded stake
+    contract.withdraw_balance()
+    assert contract.get_balance(to_addr(direct_alice)) == 0
+
+    # Replay withdrawal is blocked
+    with direct_vm.expect_revert("No balance to withdraw"):
+        contract.withdraw_balance()
+

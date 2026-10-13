@@ -1807,3 +1807,114 @@ svg.lucide {
 .toast.info .toast-icon {
   color: var(--primary);
 }
+
+/* ── Escrow Payout & Withdrawal Vault Styles ── */
+.btn-claim {
+  background: #10B981;
+  color: #FFFFFF;
+  border: 2px solid var(--border);
+  box-shadow: 3px 3px 0px var(--border);
+  font-weight: 800;
+}
+.btn-claim:hover {
+  background: #059669;
+  box-shadow: 4px 4px 0px var(--border);
+}
+
+.btn-outline-danger {
+  background: #FEF2F2;
+  color: #DC2626;
+  border: 2px solid #DC2626;
+  box-shadow: 3px 3px 0px var(--border);
+  font-weight: 700;
+}
+.btn-outline-danger:hover {
+  background: #FEE2E2;
+  box-shadow: 4px 4px 0px var(--border);
+}
+
+.escrow-payout-banner {
+  background: #FFFFFF;
+  border: 3px solid var(--border);
+  box-shadow: var(--shadow-md);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.payout-banner-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.payout-banner-icon {
+  width: 48px;
+  height: 48px;
+  background: #ECFDF5;
+  border: 2px solid var(--border);
+  box-shadow: 2px 2px 0px var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #059669;
+  font-size: 1.5rem;
+}
+
+.payout-banner-title {
+  font-family: var(--font-headline);
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.payout-banner-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  max-width: 600px;
+}
+
+.payout-banner-action {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.payout-balance-display {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.payout-balance-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.payout-balance-value {
+  font-family: var(--font-mono);
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #059669;
+}
+
+.cancelled-status-note {
+  font-size: 0.82rem;
+  color: #94A3B8;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #F8FAFC;
+  border: 1px dashed #CBD5E1;
+  width: 100%;
+}

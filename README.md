@@ -92,6 +92,7 @@ def judge_duel(self, duel_id: u256) -> None:
 - `accept_duel(duel_id: u256, punchline: str) -> None` *(payable)*: Matches the required stake and submits the counter-punchline.
 - `judge_duel(duel_id: u256) -> None`: Summons the 5-validator AI jury to evaluate both punchlines and crown the winner.
 - `cancel_duel(duel_id: u256) -> None`: Allows creator to cancel an open duel and reclaim their stake if no challenger has joined.
+- `withdraw_balance() -> None`: Safe payout path consuming credited winnings or refunds before external transfer (prevents replay/reentrancy).
 
 ### View Methods (Read-Only)
 - `get_duel(duel_id: u256) -> dict`: Returns full duel data (contenders, lines, status, scores, critique, MVP quote).
@@ -105,10 +106,10 @@ def judge_duel(self, duel_id: u256) -> None:
 
 ## Testing & Verification
 
-The contract includes a complete suite of in-memory direct mode tests validating all state transitions, boundary conditions, and LLM jury mocking:
+The contract includes a complete suite of in-memory direct mode tests validating all state transitions, boundary conditions, cancellation actions, safe payout paths, and anti-replay verification:
 
 ```bash
-# Run all 8 direct mode tests
+# Run all 11 direct mode tests
 pytest tests/test_roast_wars.py -v
 ```
 
@@ -122,8 +123,11 @@ tests/test_roast_wars.py::test_accept_wrong_stake_reverts PASSED
 tests/test_roast_wars.py::test_cancel_duel PASSED
 tests/test_roast_wars.py::test_judge_duel_creator_wins PASSED
 tests/test_roast_wars.py::test_judge_duel_compliment_mode PASSED
+tests/test_roast_wars.py::test_winner_credits_withdraw_no_replay PASSED
+tests/test_roast_wars.py::test_tie_credits_withdraw_no_replay PASSED
+tests/test_roast_wars.py::test_cancellation_credits_withdraw_no_replay PASSED
 
-============================== 8 passed in 0.29s ===============================
+============================== 11 passed in 0.70s ===============================
 ```
 
 ### Static Analysis & Linter

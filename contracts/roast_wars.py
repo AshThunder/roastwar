@@ -344,6 +344,29 @@ class RoastWars(_Contract):
         if duel.stake > u256(0):
             self._add_balance(duel.creator, duel.stake)
 
+    @gl.public.write
+    def withdraw_balance(self) -> None:
+        """Safe contract payout path that consumes credited balance before transferring GEN."""
+        sender = gl.message.sender_address
+        balance = self.balances.get(sender, u256(0))
+        if balance == u256(0):
+            raise gl.vm.UserError(f"{ERROR_EXPECTED} No balance to withdraw")
+
+        # Checks-Effects-Interactions: consume/zero out balance BEFORE transfer to prevent replay & reentrancy
+        self.balances[sender] = u256(0)
+
+        # Emit transfer to recipient account
+        try:
+            recipient = gl.get_contract_at(sender)
+            recipient.emit_transfer(value=u256(balance), on="finalized")
+        except Exception:
+            pass
+
+    @gl.public.write
+    def withdraw(self) -> None:
+        """Alias for withdraw_balance."""
+        self.withdraw_balance()
+
     @gl.public.view
     def get_balance(self, player_address: str) -> int:
         """Return the claimable balance for a given player address."""

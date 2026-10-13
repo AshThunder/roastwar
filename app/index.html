@@ -175,6 +175,25 @@
             </select>
           </div>
         </div>
+      <!-- Escrow Winnings & Refunds Vault Banner -->
+      <div class="escrow-payout-banner" id="escrowPayoutBanner">
+        <div class="payout-banner-info">
+          <div class="payout-banner-icon"><i data-lucide="wallet-cards"></i></div>
+          <div>
+            <div class="payout-banner-title">ESCROW WINNINGS & REFUNDS VAULT</div>
+            <div class="payout-banner-desc">Credited prize pots from victories, split tie refunds, and cancelled stakes are safely stored on-chain and ready for withdrawal.</div>
+          </div>
+        </div>
+        <div class="payout-banner-action">
+          <div class="payout-balance-display">
+            <span class="payout-balance-label">Withdrawable:</span>
+            <span class="payout-balance-value" id="userClaimableBalanceText">0.00 GEN</span>
+          </div>
+          <button class="btn btn-claim" id="btnWithdrawVault" onclick="withdrawWinningsAction()">
+            <span class="btn-icon"><i data-lucide="arrow-down-to-line"></i></span>
+            <span>Withdraw GEN</span>
+          </button>
+        </div>
       </div>
 
       <!-- Duel Cards Grid -->
