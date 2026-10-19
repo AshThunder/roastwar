@@ -355,12 +355,16 @@ class RoastWars(_Contract):
         # Checks-Effects-Interactions: consume/zero out balance BEFORE transfer to prevent replay & reentrancy
         self.balances[sender] = u256(0)
 
-        # Emit transfer to recipient account
+        # Transfer GEN to recipient account - do NOT suppress transfer exceptions; restore balance on failure
         try:
             recipient = gl.get_contract_at(sender)
             recipient.emit_transfer(value=u256(balance), on="finalized")
-        except Exception:
-            pass
+        except gl.vm.UserError:
+            self.balances[sender] = balance
+            raise
+        except Exception as e:
+            self.balances[sender] = balance
+            raise gl.vm.UserError(f"{ERROR_TRANSIENT} Transfer execution failed: {str(e)}")
 
     @gl.public.write
     def withdraw(self) -> None:

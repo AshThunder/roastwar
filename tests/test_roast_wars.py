@@ -168,8 +168,27 @@ def test_judge_duel_compliment_mode(direct_vm, direct_deploy, direct_alice, dire
     assert duel["opponent_score"] == 10
 
 
+def setup_transfer_tracker(direct_vm):
+    """Install hook on direct_vm to capture all native GEN PostMessage transfers."""
+    transfers = []
+    def hook(vm, req):
+        if "PostMessage" in req:
+            transfers.append(req["PostMessage"])
+            return {"ok": None}
+        return None
+    direct_vm._gl_call_hook = hook
+    return transfers
+
+
+def get_transfer_recipient(transfer: dict) -> str:
+    recipient_addr = transfer["address"]
+    if hasattr(recipient_addr, "as_bytes"):
+        return "0x" + recipient_addr.as_bytes.hex()
+    return "0x" + bytes(recipient_addr).hex()
+
+
 def test_winner_credits_withdraw_no_replay(direct_vm, direct_deploy, direct_alice, direct_bob):
-    """Winner can withdraw credited pot, and subsequent withdraw reverts (no replay)."""
+    """Winner can withdraw credited pot, verifies GEN is paid, and subsequent withdraw reverts (no replay)."""
     contract = direct_deploy("contracts/roast_wars.py")
 
     direct_vm.sender = direct_alice
@@ -194,12 +213,20 @@ def test_winner_credits_withdraw_no_replay(direct_vm, direct_deploy, direct_alic
     assert contract.get_balance(to_addr(direct_alice)) == 4 * 10**18
     assert contract.get_balance(to_addr(direct_bob)) == 0
 
+    # Install transfer tracker to verify actual GEN payout
+    transfers = setup_transfer_tracker(direct_vm)
+
     # Alice withdraws her winnings
     direct_vm.sender = direct_alice
     contract.withdraw_balance()
 
-    # Balance is consumed to 0
+    # Balance is consumed to 0 in contract ledger
     assert contract.get_balance(to_addr(direct_alice)) == 0
+
+    # Verify GEN was actually paid to Alice
+    assert len(transfers) == 1
+    assert get_transfer_recipient(transfers[0]).lower() == to_addr(direct_alice).lower()
+    assert transfers[0]["value"] == 4 * 10**18
 
     # Second withdrawal attempt reverts (preventing replay)
     with direct_vm.expect_revert("No balance to withdraw"):
@@ -207,7 +234,7 @@ def test_winner_credits_withdraw_no_replay(direct_vm, direct_deploy, direct_alic
 
 
 def test_tie_credits_withdraw_no_replay(direct_vm, direct_deploy, direct_alice, direct_bob):
-    """Both contenders receive refunds on a tie, can withdraw once, and replay is blocked."""
+    """Both contenders receive refunds on a tie, verify GEN is paid out to each, and replay is blocked."""
     contract = direct_deploy("contracts/roast_wars.py")
 
     direct_vm.sender = direct_alice
@@ -232,10 +259,18 @@ def test_tie_credits_withdraw_no_replay(direct_vm, direct_deploy, direct_alice, 
     assert contract.get_balance(to_addr(direct_alice)) == 15 * 10**17
     assert contract.get_balance(to_addr(direct_bob)) == 15 * 10**17
 
+    # Install transfer tracker
+    transfers = setup_transfer_tracker(direct_vm)
+
     # Alice withdraws her refund
     direct_vm.sender = direct_alice
     contract.withdraw_balance()
     assert contract.get_balance(to_addr(direct_alice)) == 0
+
+    # Verify GEN was paid to Alice
+    assert len(transfers) == 1
+    assert get_transfer_recipient(transfers[0]).lower() == to_addr(direct_alice).lower()
+    assert transfers[0]["value"] == 15 * 10**17
 
     # Alice replay attempt reverts
     with direct_vm.expect_revert("No balance to withdraw"):
@@ -246,13 +281,18 @@ def test_tie_credits_withdraw_no_replay(direct_vm, direct_deploy, direct_alice, 
     contract.withdraw_balance()
     assert contract.get_balance(to_addr(direct_bob)) == 0
 
+    # Verify GEN was paid to Bob
+    assert len(transfers) == 2
+    assert get_transfer_recipient(transfers[1]).lower() == to_addr(direct_bob).lower()
+    assert transfers[1]["value"] == 15 * 10**17
+
     # Bob replay attempt reverts
     with direct_vm.expect_revert("No balance to withdraw"):
         contract.withdraw_balance()
 
 
 def test_cancellation_credits_withdraw_no_replay(direct_vm, direct_deploy, direct_alice):
-    """Creator recovers stake upon cancellation, cancellation cannot be repeated, and withdraw cannot replay."""
+    """Creator recovers stake upon cancellation, verifies GEN is paid, and replay is blocked."""
     contract = direct_deploy("contracts/roast_wars.py")
 
     direct_vm.sender = direct_alice
@@ -274,11 +314,62 @@ def test_cancellation_credits_withdraw_no_replay(direct_vm, direct_deploy, direc
     with direct_vm.expect_revert("Cannot cancel duel in status 'CANCELLED'"):
         contract.cancel_duel(1)
 
+    # Install transfer tracker
+    transfers = setup_transfer_tracker(direct_vm)
+
     # Alice withdraws her refunded stake
     contract.withdraw_balance()
     assert contract.get_balance(to_addr(direct_alice)) == 0
 
+    # Verify GEN transfer was paid to Alice
+    assert len(transfers) == 1
+    assert get_transfer_recipient(transfers[0]).lower() == to_addr(direct_alice).lower()
+    assert transfers[0]["value"] == 3 * 10**18
+
     # Replay withdrawal is blocked
+    with direct_vm.expect_revert("No balance to withdraw"):
+        contract.withdraw_balance()
+
+
+def test_withdraw_transfer_failure_does_not_suppress_and_preserves_balance(direct_vm, direct_deploy, direct_alice):
+    """If transfer fails, the exception is NOT suppressed, balance is preserved, and funds remain recoverable."""
+    contract = direct_deploy("contracts/roast_wars.py")
+
+    direct_vm.sender = direct_alice
+    direct_vm.value = 2 * 10**18
+    contract.create_duel("DAO Governance", "ROAST", "A 100-page proposal to decide whether the logo should be 2% more purple.")
+
+    # Cancel duel to credit Alice with 2 GEN in escrow
+    contract.cancel_duel(1)
+    assert contract.get_balance(to_addr(direct_alice)) == 2 * 10**18
+
+    # Hook that simulates a downstream network/transfer failure
+    def failing_hook(vm, req):
+        if "PostMessage" in req:
+            raise RuntimeError("Underlying RPC node network failure")
+        return None
+    direct_vm._gl_call_hook = failing_hook
+
+    # Attempting withdrawal must NOT suppress the exception! It must raise an error.
+    with direct_vm.expect_revert("Transfer execution failed"):
+        contract.withdraw_balance()
+
+    # Crucial guarantee: credited balance was NOT zeroed or lost to a black hole
+    assert contract.get_balance(to_addr(direct_alice)) == 2 * 10**18
+
+    # Now simulate recovered network/transfer environment
+    transfers = setup_transfer_tracker(direct_vm)
+
+    # Alice can now safely recover her funds
+    contract.withdraw_balance()
+    assert contract.get_balance(to_addr(direct_alice)) == 0
+
+    # Verify GEN was safely received
+    assert len(transfers) == 1
+    assert get_transfer_recipient(transfers[0]).lower() == to_addr(direct_alice).lower()
+    assert transfers[0]["value"] == 2 * 10**18
+
+    # Anti-replay remains enforced
     with direct_vm.expect_revert("No balance to withdraw"):
         contract.withdraw_balance()
 
